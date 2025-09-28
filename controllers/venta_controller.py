@@ -189,15 +189,35 @@ class VentaController:
         except Exception as e:
             messagebox.showerror("Error", f"Error al buscar ventas: {str(e)}")
             return []
-    
+
+    def eliminar_venta(self, venta_id):
+        """Eliminar una venta por ID"""
+        try:
+            # Buscar la venta
+            venta = Venta.obtener_por_id(venta_id)
+            if not venta:
+                messagebox.showerror("Error", "Venta no encontrada")
+                return False
+
+            # Eliminar la venta
+            if venta.eliminar():
+                return True
+            else:
+                messagebox.showerror("Error", "No se pudo eliminar la venta")
+                return False
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al eliminar venta: {str(e)}")
+            return False
+
     def obtener_ventas_por_periodo(self, dias):
         """Obtener ventas de los últimos N días"""
         try:
             fecha_fin = datetime.now().strftime('%Y-%m-%d')
             fecha_inicio = (datetime.now() - timedelta(days=dias)).strftime('%Y-%m-%d')
-            
+
             return Venta.obtener_ventas_por_fecha(fecha_inicio, fecha_fin)
-            
+
         except Exception as e:
             messagebox.showerror("Error", f"Error al obtener ventas por período: {str(e)}")
             return []

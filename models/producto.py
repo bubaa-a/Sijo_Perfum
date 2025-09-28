@@ -4,8 +4,9 @@ Modelo para gestión de productos
 from config.database import DatabaseManager
 
 class Producto:
-    def __init__(self, nombre="", descripcion="", precio_compra=0.0, 
-                 precio_venta=0.0, stock=0, stock_minimo=5, categoria=""):
+    def __init__(self, nombre="", descripcion="", precio_compra=0.0,
+                 precio_venta=0.0, stock=0, stock_minimo=5, categoria="",
+                 marca="", tipo="", proveedor=""):
         self.id = None
         self.nombre = nombre
         self.descripcion = descripcion
@@ -14,19 +15,23 @@ class Producto:
         self.stock = stock
         self.stock_minimo = stock_minimo
         self.categoria = categoria
+        self.marca = marca
+        self.tipo = tipo
+        self.proveedor = proveedor
         self.activo = True
         self.db = DatabaseManager()
     
     def guardar(self):
         """Guardar producto en la base de datos"""
         query = '''
-            INSERT INTO productos 
-            (nombre, descripcion, precio_compra, precio_venta, stock, stock_minimo, categoria)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO productos
+            (nombre, descripcion, precio_compra, precio_venta, stock, stock_minimo, categoria, marca, tipo, proveedor)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         '''
         parametros = (
             self.nombre, self.descripcion, self.precio_compra,
-            self.precio_venta, self.stock, self.stock_minimo, self.categoria
+            self.precio_venta, self.stock, self.stock_minimo, self.categoria,
+            self.marca, self.tipo, self.proveedor
         )
         
         resultado = self.db.ejecutar_consulta(query, parametros)
@@ -36,17 +41,17 @@ class Producto:
         """Actualizar producto existente"""
         if not self.id:
             return False
-        
+
         query = '''
             UPDATE productos SET
             nombre=?, descripcion=?, precio_compra=?, precio_venta=?,
-            stock=?, stock_minimo=?, categoria=?
+            stock=?, stock_minimo=?, categoria=?, marca=?, tipo=?, proveedor=?
             WHERE id=?
         '''
         parametros = (
             self.nombre, self.descripcion, self.precio_compra,
             self.precio_venta, self.stock, self.stock_minimo,
-            self.categoria, self.id
+            self.categoria, self.marca, self.tipo, self.proveedor, self.id
         )
         
         resultado = self.db.ejecutar_consulta(query, parametros)
@@ -80,6 +85,10 @@ class Producto:
                 producto.stock = fila[5]
                 producto.stock_minimo = fila[6]
                 producto.categoria = fila[7]
+                # Nuevos campos (pueden ser None en productos existentes)
+                producto.marca = str(fila[10]) if len(fila) > 10 and fila[10] is not None else ""
+                producto.tipo = str(fila[11]) if len(fila) > 11 and fila[11] is not None else ""
+                producto.proveedor = str(fila[12]) if len(fila) > 12 and fila[12] is not None else ""
                 productos.append(producto)
         
         return productos
@@ -102,6 +111,10 @@ class Producto:
             producto.stock = fila[5]
             producto.stock_minimo = fila[6]
             producto.categoria = fila[7]
+            # Nuevos campos (pueden ser None en productos existentes)
+            producto.marca = str(fila[10]) if len(fila) > 10 and fila[10] is not None else ""
+            producto.tipo = str(fila[11]) if len(fila) > 11 and fila[11] is not None else ""
+            producto.proveedor = str(fila[12]) if len(fila) > 12 and fila[12] is not None else ""
             return producto
         
         return None

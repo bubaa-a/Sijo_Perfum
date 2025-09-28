@@ -108,42 +108,55 @@ class ClienteController:
         Eliminar cliente y sus datos relacionados
         """
         try:
-            # Verificar si el cliente tiene ventas
-            from models.venta import Venta
-            ventas_cliente = Venta.obtener_por_cliente(cliente_id)
-        
-            if ventas_cliente:
+            # Verificar si el cliente tiene ventas usando consulta directa
+            from config.database import DatabaseManager
+            db = DatabaseManager()
+
+            # Consultar ventas del cliente
+            query_ventas = "SELECT COUNT(*) FROM ventas WHERE cliente_id = ?"
+            resultado = db.ejecutar_consulta(query_ventas, (cliente_id,))
+            num_ventas = resultado[0][0] if resultado else 0
+
+            if num_ventas > 0:
                 respuesta = messagebox.askyesno(
                     "Cliente con ventas",
-                    f"Este cliente tiene {len(ventas_cliente)} venta(s) registrada(s).\n\n" +
+                    f"Este cliente tiene {num_ventas} venta(s) registrada(s).\n\n" +
                     "¿Desea eliminarlo de todas formas?\n" +
                     "(Se mantendrán las ventas pero sin cliente asociado)"
                 )
                 if not respuesta:
                     return False
-        
+
             # Verificar si tiene cuenta corriente con deuda
-            from controllers.cuenta_controller import CuentaController
-            cuenta_controller = CuentaController()
-            cuenta_info = cuenta_controller.obtener_cuenta_cliente(cliente_id)
-        
-            if cuenta_info and cuenta_info['saldo_pendiente'] > 0:
-                respuesta = messagebox.askyesno(
-                    "Cliente con deuda pendiente",
-                    f"Este cliente tiene una deuda pendiente de ${cuenta_info['saldo_pendiente']:,.0f}\n\n" +
-                    "¿Desea eliminarlo de todas formas?\n" +
-                    "(Se perderá el registro de la deuda)"
-                )
-                if not respuesta:
-                    return False
-        
+            try:
+                from controllers.cuenta_controller import CuentaController
+                cuenta_controller = CuentaController()
+                cuenta_info = cuenta_controller.obtener_cuenta_cliente(cliente_id)
+
+                if cuenta_info and cuenta_info.get('saldo_pendiente', 0) > 0:
+                    respuesta = messagebox.askyesno(
+                        "Cliente con deuda pendiente",
+                        f"Este cliente tiene una deuda pendiente de ${cuenta_info['saldo_pendiente']:,.0f}\n\n" +
+                        "¿Desea eliminarlo de todas formas?\n" +
+                        "(Se perderá el registro de la deuda)"
+                    )
+                    if not respuesta:
+                        return False
+            except Exception as e:
+                print(f"Advertencia: No se pudo verificar la cuenta corriente: {str(e)}")
+                # Continuar con la eliminación aunque no se pueda verificar la cuenta
+
             # Proceder con eliminación
             cliente = Cliente.buscar_por_id(cliente_id)
-            if cliente and cliente.eliminar():
-                messagebox.showinfo("Éxito", f"Cliente '{cliente.nombre_completo()}' eliminado correctamente")
+            if not cliente:
+                messagebox.showerror("Error", "Cliente no encontrado")
+                return False
+
+            if cliente.eliminar():
+                # NO mostrar messagebox aquí para evitar conflictos con la vista
                 return True
             else:
-                messagebox.showerror("Error", "No se pudo eliminar el cliente")
+                messagebox.showerror("Error", "No se pudo eliminar el cliente de la base de datos")
                 return False
             
         except Exception as e:

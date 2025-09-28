@@ -191,6 +191,31 @@ class Venta:
             ganancia += detalle.calcular_ganancia()
         return ganancia
 
+    def eliminar(self):
+        """Eliminar venta y sus detalles"""
+        try:
+            conn = self.db.conectar()
+            cursor = conn.cursor()
+
+            # Primero eliminar los detalles de venta
+            cursor.execute("DELETE FROM detalle_ventas WHERE venta_id = ?", (self.id,))
+
+            # Luego eliminar la venta principal
+            cursor.execute("DELETE FROM ventas WHERE id = ?", (self.id,))
+
+            # Confirmar los cambios
+            conn.commit()
+            conn.close()
+
+            return True
+
+        except Exception as e:
+            print(f"Error al eliminar venta: {str(e)}")
+            if 'conn' in locals():
+                conn.rollback()
+                conn.close()
+            return False
+
 class DetalleVenta:
     def __init__(self, venta_id=None, producto_id=None, cantidad=0, precio_unitario=0.0):
         self.id = None

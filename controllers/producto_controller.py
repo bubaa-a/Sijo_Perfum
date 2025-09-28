@@ -29,7 +29,10 @@ class ProductoController:
                 precio_venta=float(datos['precio_venta']),
                 stock=int(datos['stock']),
                 stock_minimo=int(datos['stock_minimo']),
-                categoria=datos['categoria']
+                categoria=datos['categoria'],
+                marca=datos.get('marca', ''),
+                tipo=datos.get('tipo', ''),
+                proveedor=datos.get('proveedor', '')
             )
             
             # Guardar en la base de datos
@@ -75,6 +78,9 @@ class ProductoController:
             producto.stock = int(datos['stock'])
             producto.stock_minimo = int(datos['stock_minimo'])
             producto.categoria = datos['categoria']
+            producto.marca = datos.get('marca', '')
+            producto.tipo = datos.get('tipo', '')
+            producto.proveedor = datos.get('proveedor', '')
             
             # Guardar cambios
             if producto.actualizar():

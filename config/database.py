@@ -134,9 +134,38 @@ class DatabaseManager:
                 FOREIGN KEY (cliente_id) REFERENCES clientes(id)
             )
         ''')
+
+        # Agregar nuevas columnas a la tabla productos si no existen
+        self.agregar_columnas_productos(cursor, conn)
+
         conn.commit()
         self.cerrar_conexion()
         print(" Base de datos y tablas creadas correctamente")
+
+    def agregar_columnas_productos(self, cursor, conn):
+        """Agregar nuevas columnas a la tabla productos"""
+        try:
+            # Verificar si las columnas ya existen
+            cursor.execute("PRAGMA table_info(productos)")
+            columnas_existentes = [col[1] for col in cursor.fetchall()]
+
+            # Agregar columna marca si no existe
+            if 'marca' not in columnas_existentes:
+                cursor.execute("ALTER TABLE productos ADD COLUMN marca TEXT")
+                print(" ✅ Columna 'marca' agregada a productos")
+
+            # Agregar columna tipo si no existe
+            if 'tipo' not in columnas_existentes:
+                cursor.execute("ALTER TABLE productos ADD COLUMN tipo TEXT")
+                print(" ✅ Columna 'tipo' agregada a productos")
+
+            # Agregar columna proveedor si no existe
+            if 'proveedor' not in columnas_existentes:
+                cursor.execute("ALTER TABLE productos ADD COLUMN proveedor TEXT")
+                print(" ✅ Columna 'proveedor' agregada a productos")
+
+        except Exception as e:
+            print(f" ⚠️ Error al agregar columnas: {e}")
     
     def ejecutar_consulta(self, query, parametros=None):
         """Ejecutar una consulta SQL"""

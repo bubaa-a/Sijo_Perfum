@@ -75,18 +75,36 @@ class VentanaCuentas:
         frame_cuentas = ttk.Frame(self.notebook)
         self.notebook.add(frame_cuentas, text="Lista de Cuentas")
         
-        # Filtros
+        # Filtros y búsqueda
         filtros_frame = tk.Frame(frame_cuentas, bg='white', relief='solid', bd=1)
         filtros_frame.pack(fill='x', padx=10, pady=10)
-        
-        tk.Label(filtros_frame, text="Filtrar por:", font=("Segoe UI", 10, "bold"), 
-                bg='white').pack(side='left', padx=10, pady=10)
-        
+
+        # Sección izquierda - Filtros
+        filtros_left = tk.Frame(filtros_frame, bg='white')
+        filtros_left.pack(side='left', fill='y', padx=10, pady=10)
+
+        tk.Label(filtros_left, text="Filtrar por:", font=("Segoe UI", 10, "bold"),
+                bg='white').pack(side='left')
+
         self.filtro_var = tk.StringVar(value="Todos")
         filtros = ["Todos", "Con deuda", "Al día"]
         for filtro in filtros:
-            tk.Radiobutton(filtros_frame, text=filtro, variable=self.filtro_var, value=filtro,
+            tk.Radiobutton(filtros_left, text=filtro, variable=self.filtro_var, value=filtro,
                           bg='white', command=self.filtrar_cuentas).pack(side='left', padx=10)
+
+        # Sección derecha - Búsqueda
+        buscar_frame = tk.Frame(filtros_frame, bg='white')
+        buscar_frame.pack(side='right', padx=10, pady=10)
+
+        tk.Label(buscar_frame, text="Buscar Cliente:", font=("Segoe UI", 10, "bold"),
+                bg='white').pack(side='left', padx=(0, 5))
+
+        self.buscar_var = tk.StringVar()
+        self.buscar_var.trace('w', self.buscar_cuentas)
+
+        buscar_entry = tk.Entry(buscar_frame, textvariable=self.buscar_var,
+                               font=("Segoe UI", 10), width=25, relief='solid', bd=1)
+        buscar_entry.pack(side='left')
         
         # Tabla de cuentas
         self.crear_tabla_cuentas(frame_cuentas)
@@ -405,12 +423,81 @@ class VentanaCuentas:
             self.tree_cuentas.tag_configure('con_deuda', background='#fff3cd')
             
             print(f"DEBUG: Filtro aplicado, {len(self.tree_cuentas.get_children())} filas mostradas")
-            
+
         except Exception as e:
             print(f"ERROR al filtrar: {str(e)}")
             # Como fallback, cargar todos
             self.cargar_tabla_cuentas()
-    
+
+    def buscar_cuentas(self, *args):
+        """Buscar cuentas por nombre de cliente"""
+        try:
+            termino = self.buscar_var.get().lower()
+            filtro = self.filtro_var.get()
+
+            # Limpiar tabla
+            for item in self.tree_cuentas.get_children():
+                self.tree_cuentas.delete(item)
+
+            from models.cliente import Cliente
+            from models.cuenta_corriente import CuentaCorriente
+
+            clientes = Cliente.obtener_todos()
+
+            for cliente in clientes:
+                # Si hay término de búsqueda, filtrar por nombre
+                if termino.strip():
+                    nombre_completo = f"{cliente.nombre} {cliente.apellido}".lower()
+                    if termino not in nombre_completo:
+                        continue
+
+                # Asegurar cuenta corriente
+                CuentaCorriente.crear_cuenta_si_no_existe(cliente.id)
+
+                # Obtener información de cuenta
+                cuenta_info = self.controller.obtener_cuenta_cliente(cliente.id)
+
+                if cuenta_info:
+                    saldo_pendiente = cuenta_info['saldo_pendiente']
+                    deuda_total = cuenta_info['saldo_total']
+                    fecha = cuenta_info.get('fecha_ultima_actualizacion', 'N/A')
+                else:
+                    saldo_pendiente = 0
+                    deuda_total = 0
+                    fecha = 'N/A'
+
+                # Aplicar filtro de estado
+                if filtro == "Con deuda" and saldo_pendiente <= 0:
+                    continue
+                elif filtro == "Al día" and saldo_pendiente > 0:
+                    continue
+
+                # Determinar estado y tag
+                if saldo_pendiente > 0:
+                    estado = "Con deuda"
+                    tag = 'con_deuda'
+                else:
+                    estado = "Al día"
+                    tag = 'al_dia'
+
+                # Agregar a la tabla
+                cliente_nombre = f"{cliente.nombre} {cliente.apellido}"
+                self.tree_cuentas.insert('', 'end', values=(
+                    cliente_nombre,
+                    f"${deuda_total:,.0f}",
+                    f"${saldo_pendiente:,.0f}",
+                    estado,
+                    fecha
+                ), tags=(tag,))
+
+            # Configurar colores
+            self.tree_cuentas.tag_configure('al_dia', background='#d5f4e6')
+            self.tree_cuentas.tag_configure('con_deuda', background='#fff3cd')
+
+        except Exception as e:
+            print(f"ERROR al buscar: {str(e)}")
+            self.cargar_tabla_cuentas()
+
     def actualizar_combo_clientes_abono(self):
         """Actualizar combo de clientes para abonos - solo clientes activos"""
         try:
