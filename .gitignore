@@ -1,0 +1,25 @@
+# Base de datos
+inventario.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Entornos virtuales
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Temporales
+*.tmp
+*.bak
+*.log
