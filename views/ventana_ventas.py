@@ -1,9 +1,13 @@
 """
-Ventana para gestión de ventas - Diseño elegante y funcional
+Ventana para gestión de ventas - Diseño Moderno con CustomTkinter
+Versión con estilos unificados
 """
 import tkinter as tk
 from tkinter import ttk, messagebox
+import customtkinter as ctk
 from controllers.venta_controller import VentaController
+from config.estilos import (Colores, Fuentes, Espaciado, Dimensiones,
+                            Iconos, obtener_color_hover)
 
 class VentanaVentas:
     def __init__(self, parent):
@@ -18,17 +22,21 @@ class VentanaVentas:
         self.crear_ventana()
 
     def crear_ventana(self):
-        """Crear la ventana de ventas con diseño elegante"""
+        """Crear la ventana de ventas con diseño moderno CustomTkinter"""
+        # Configurar CustomTkinter
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("blue")
+
         self.ventana = tk.Toplevel(self.parent)
         self.ventana.title("Gestión de Ventas - Sistema Empresarial Pro")
-        self.ventana.geometry("1600x900")
-        self.ventana.configure(bg='#f4f6f9')
+        self.ventana.geometry("1650x950")
+        self.ventana.configure(bg=Colores.BG_PRIMARY)
 
-        # Hacer que la ventana sea modal
+        # Modal
         self.ventana.transient(self.parent)
         self.ventana.grab_set()
 
-        # Configurar el grid principal
+        # Grid principal
         self.ventana.grid_rowconfigure(1, weight=1)
         self.ventana.grid_columnconfigure(0, weight=1)
 
@@ -36,7 +44,7 @@ class VentanaVentas:
         self.cargar_datos_iniciales()
 
         # Crear interfaz
-        self.crear_header_elegante()
+        self.crear_header()
         self.crear_contenido_principal()
 
         # Cargar ventas
@@ -51,74 +59,87 @@ class VentanaVentas:
             self.productos_disponibles = []
             self.clientes_disponibles = []
 
-    def crear_header_elegante(self):
-        """Crear header elegante con gradiente y estadísticas"""
-        # Header principal con gradiente simulado
-        header_frame = tk.Frame(self.ventana, bg='#2c3e50', height=110)
-        header_frame.grid(row=0, column=0, sticky='ew')
-        header_frame.grid_propagate(False)
-        header_frame.grid_columnconfigure(1, weight=1)
+    def crear_header(self):
+        """Crear header moderno con CustomTkinter"""
+        header = ctk.CTkFrame(
+            self.ventana,
+            fg_color=(Colores.PRIMARY_START, Colores.PRIMARY_END),
+            height=Dimensiones.HEADER_HEIGHT,
+            corner_radius=0
+        )
+        header.grid(row=0, column=0, sticky='ew')
+        header.grid_propagate(False)
+        header.grid_columnconfigure(1, weight=1)
 
-        # Sección izquierda - Título
-        title_section = tk.Frame(header_frame, bg='#2c3e50')
-        title_section.grid(row=0, column=0, sticky='w', padx=40, pady=25)
+        # Título izquierdo
+        title_frame = ctk.CTkFrame(header, fg_color="transparent")
+        title_frame.grid(row=0, column=0, sticky='w', padx=Espaciado.XXL, pady=Espaciado.MEDIO)
 
-        # Título principal con estilo
-        tk.Label(title_section, text="SISTEMA DE VENTAS",
-                font=("Segoe UI", 22, "bold"), fg='#ecf0f1', bg='#2c3e50').pack(anchor='w')
+        ctk.CTkLabel(
+            title_frame,
+            text=f"{Iconos.VENTAS} SISTEMA DE VENTAS",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.XL, Fuentes.BOLD),
+            text_color=Colores.TEXT_WHITE
+        ).pack(anchor='w')
 
-        tk.Label(title_section, text="Gestión completa de ventas y facturación",
-                font=("Segoe UI", 11), fg='#bdc3c7', bg='#2c3e50').pack(anchor='w', pady=(2, 0))
+        ctk.CTkLabel(
+            title_frame,
+            text="Punto de venta y gestión de facturación",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO),
+            text_color='#e8eaf6'
+        ).pack(anchor='w', pady=(3, 0))
 
-        # Sección derecha - Estadísticas en tarjetas
-        stats_section = tk.Frame(header_frame, bg='#2c3e50')
-        stats_section.grid(row=0, column=1, sticky='e', padx=40, pady=20)
+        # Estadísticas derecha
+        self.stats_frame = ctk.CTkFrame(header, fg_color="transparent")
+        self.stats_frame.grid(row=0, column=1, sticky='e', padx=40, pady=20)
 
-        self.crear_tarjetas_estadisticas(stats_section)
+        self.crear_estadisticas(self.stats_frame)
 
+    def crear_estadisticas(self, parent):
+        """Crear tarjetas de estadísticas"""
+        # Limpiar contenedor antes de recrear
+        for widget in parent.winfo_children():
+            widget.destroy()
 
-    def crear_tarjetas_estadisticas(self, parent):
-        """Crear tarjetas de estadísticas elegantes"""
         try:
             stats = self.controller.obtener_estadisticas_ventas()
+            print(f"DEBUG Ventana: Estadísticas recibidas: {stats}")
 
-            # Container de tarjetas
-            cards_frame = tk.Frame(parent, bg='#2c3e50')
+            cards_frame = ctk.CTkFrame(parent, fg_color="transparent")
             cards_frame.pack()
 
-            # Tarjeta 1 - Ventas Hoy
-            card1 = tk.Frame(cards_frame, bg='#27ae60', relief='raised', bd=1, padx=15, pady=10)
-            card1.pack(side='left', padx=(0, 10))
+            # Total Vendido Hoy
+            card = ctk.CTkFrame(cards_frame, fg_color='#27ae60', corner_radius=10)
+            card.pack(side='left')
 
-            tk.Label(card1, text="Ventas Hoy", font=("Segoe UI", 9, "bold"),
-                    fg='white', bg='#27ae60').pack()
-            tk.Label(card1, text=str(stats.get('ventas_hoy', 0)), font=("Segoe UI", 16, "bold"),
-                    fg='white', bg='#27ae60').pack()
-
-            # Tarjeta 2 - Ingresos Hoy
-            card2 = tk.Frame(cards_frame, bg='#e74c3c', relief='raised', bd=1, padx=15, pady=10)
-            card2.pack(side='left')
-
-            tk.Label(card2, text="Ingresos Hoy", font=("Segoe UI", 9, "bold"),
-                    fg='white', bg='#e74c3c').pack()
+            ctk.CTkLabel(card, text="💰 Total Vendido Hoy", font=("Segoe UI", 10, "bold"),
+                        text_color='white').pack(padx=20, pady=(10, 2))
             ingresos = stats.get('ingresos_hoy', 0)
-            tk.Label(card2, text=f"${ingresos:,.0f}", font=("Segoe UI", 16, "bold"),
-                    fg='white', bg='#e74c3c').pack()
+            ctk.CTkLabel(card, text=f"${ingresos:,.0f}",
+                        font=("Segoe UI", 18, "bold"),
+                        text_color='white').pack(padx=20, pady=(0, 10))
 
-        except:
-            # Tarjeta de error simple
-            error_card = tk.Frame(parent, bg='#7f8c8d', relief='raised', bd=1, padx=20, pady=10)
+        except Exception as e:
+            print(f"Error al cargar estadísticas: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            error_card = ctk.CTkFrame(parent, fg_color='#95a5a6', corner_radius=10)
             error_card.pack()
-            tk.Label(error_card, text="Estadísticas no disponibles",
-                    font=("Segoe UI", 10), fg='white', bg='#7f8c8d').pack()
+            ctk.CTkLabel(error_card, text="Estadísticas no disponibles",
+                        font=("Segoe UI", 10),
+                        text_color='white').pack(padx=20, pady=10)
+
+    def actualizar_estadisticas(self):
+        """Actualizar las estadísticas en el header"""
+        self.crear_estadisticas(self.stats_frame)
 
     def crear_contenido_principal(self):
-        """Crear el contenido principal con diseño en columnas"""
-        # Contenedor principal
-        main_container = tk.Frame(self.ventana, bg='#f4f6f9')
-        main_container.grid(row=1, column=0, sticky='nsew', padx=25, pady=25)
-        main_container.grid_rowconfigure(1, weight=1)
-        main_container.grid_columnconfigure((0, 1), weight=1)
+        """Crear contenido principal con diseño en columnas"""
+        main_container = ctk.CTkFrame(self.ventana, fg_color='#f0f2f5', corner_radius=0)
+        main_container.grid(row=1, column=0, sticky='nsew', padx=25, pady=20)
+        main_container.grid_rowconfigure(0, weight=1)
+        main_container.grid_columnconfigure(0, weight=1)
+        main_container.grid_columnconfigure(1, weight=1)
 
         # Columna izquierda - Formulario y Carrito
         self.crear_columna_izquierda(main_container)
@@ -126,250 +147,304 @@ class VentanaVentas:
         # Columna derecha - Lista de ventas
         self.crear_columna_derecha(main_container)
 
-        # Fila inferior - Botones
+        # Botones principales
         self.crear_botones_principales(main_container)
 
     def crear_columna_izquierda(self, parent):
-        """Crear la columna izquierda con formulario y carrito"""
-        left_column = tk.Frame(parent, bg='#f4f6f9')
-        left_column.grid(row=0, column=0, rowspan=2, sticky='nsew', padx=(0, 15))
+        """Crear columna izquierda con formulario y carrito"""
+        left_column = ctk.CTkFrame(parent, fg_color='transparent')
+        left_column.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
         left_column.grid_rowconfigure(1, weight=1)
-        left_column.grid_columnconfigure(0, weight=1)
 
-        # Formulario de nueva venta
-        self.crear_formulario_elegante(left_column)
+        # Formulario
+        self.crear_formulario(left_column)
 
-        # Carrito de compras
-        self.crear_carrito_elegante(left_column)
+        # Carrito
+        self.crear_carrito(left_column)
 
-    def crear_columna_derecha(self, parent):
-        """Crear la columna derecha con la lista de ventas"""
-        right_column = tk.Frame(parent, bg='#f4f6f9')
-        right_column.grid(row=0, column=1, rowspan=2, sticky='nsew', padx=(15, 0))
-        right_column.grid_rowconfigure(0, weight=1)
-        right_column.grid_columnconfigure(0, weight=1)
+    def crear_formulario(self, parent):
+        """Crear formulario de venta moderno"""
+        # Card del formulario
+        form_card = ctk.CTkFrame(parent, fg_color='white', corner_radius=12,
+                                border_width=1, border_color='#e9ecef')
+        form_card.grid(row=0, column=0, sticky='ew', pady=(0, 15))
 
-        # Lista de ventas
-        self.crear_lista_ventas_elegante(right_column)
+        # Header
+        header_form = ctk.CTkFrame(form_card, fg_color='#667eea', height=50, corner_radius=10)
+        header_form.pack(fill='x', padx=2, pady=2)
+        header_form.pack_propagate(False)
 
-    def crear_formulario_elegante(self, parent):
-        """Crear formulario elegante para nueva venta"""
-        # Marco del formulario
-        form_frame = tk.LabelFrame(parent, text="   Nueva Venta   ",
-                                  font=("Segoe UI", 13, "bold"), fg='#2c3e50',
-                                  bg='white', relief='solid', bd=1, padx=20, pady=15)
-        form_frame.grid(row=0, column=0, sticky='ew', pady=(0, 20))
-        form_frame.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(header_form, text="📝 Nueva Venta",
+                    font=("Segoe UI", 14, "bold"),
+                    text_color='white').pack(expand=True)
 
-        # Variables del formulario
+        # Contenido
+        form_content = ctk.CTkFrame(form_card, fg_color='white')
+        form_content.pack(fill='x', padx=20, pady=20)
+
+        # Variables
+        self.numero_recibo_var = tk.StringVar()
         self.cliente_var = tk.StringVar()
         self.producto_var = tk.StringVar()
         self.cantidad_var = tk.StringVar()
         self.precio_var = tk.StringVar()
         self.observaciones_var = tk.StringVar()
 
-        # Estilo común
-        label_style = {'font': ('Segoe UI', 10, 'bold'), 'fg': '#34495e', 'bg': 'white'}
-        entry_style = {'font': ('Segoe UI', 10), 'relief': 'solid', 'bd': 1, 'bg': '#fafbfc'}
+        # Generar número de recibo automáticamente
+        self.generar_numero_recibo()
 
-        # Sección Cliente
-        cliente_frame = tk.Frame(form_frame, bg='white')
-        cliente_frame.grid(row=0, column=0, sticky='ew', pady=(0, 15))
-        cliente_frame.grid_columnconfigure(1, weight=1)
+        # Número de Recibo (solo lectura)
+        ctk.CTkLabel(form_content, text="🧾 Número de Recibo:",
+                    font=("Segoe UI", 11, "bold"),
+                    text_color='#667eea').pack(anchor='w', pady=(0, 5))
 
-        tk.Label(cliente_frame, text="Cliente:", **label_style).grid(row=0, column=0, sticky='w', pady=(0, 5))
-        self.cliente_combo = ttk.Combobox(cliente_frame, textvariable=self.cliente_var,
-                                         state="readonly", font=('Segoe UI', 10), width=40)
-        self.cliente_combo.grid(row=1, column=0, columnspan=2, sticky='ew', pady=(0, 10))
+        recibo_entry = ctk.CTkEntry(form_content, textvariable=self.numero_recibo_var,
+                                   font=("Segoe UI", 10, "bold"),
+                                   height=32, corner_radius=8,
+                                   border_width=1, border_color='#dee2e6',
+                                   state='readonly',
+                                   fg_color='#f8f9fa',
+                                   text_color='#667eea')
+        recibo_entry.pack(fill='x', pady=(0, 15))
 
-        tk.Label(cliente_frame, text="Observaciones:", **label_style).grid(row=2, column=0, sticky='w', pady=(0, 5))
-        tk.Entry(cliente_frame, textvariable=self.observaciones_var, **entry_style).grid(
-            row=3, column=0, columnspan=2, sticky='ew')
+        # Cliente
+        ctk.CTkLabel(form_content, text="👤 Cliente:",
+                    font=("Segoe UI", 11, "bold"),
+                    text_color='#667eea').pack(anchor='w', pady=(0, 5))
 
-        # Línea separadora
-        separator = tk.Frame(form_frame, bg='#ecf0f1', height=2)
-        separator.grid(row=1, column=0, sticky='ew', pady=20)
+        self.cliente_combo = ttk.Combobox(form_content, textvariable=self.cliente_var,
+                                         state="readonly", font=("Segoe UI", 10))
+        self.cliente_combo.pack(fill='x', pady=(0, 15), ipady=4)
 
-        # Sección Productos
-        productos_label = tk.Label(form_frame, text="Agregar Productos al Carrito",
-                                  font=("Segoe UI", 11, "bold"), fg='#e74c3c', bg='white')
-        productos_label.grid(row=2, column=0, sticky='w', pady=(0, 15))
+        # Observaciones
+        ctk.CTkLabel(form_content, text="📄 Observaciones:",
+                    font=("Segoe UI", 11, "bold"),
+                    text_color='#667eea').pack(anchor='w', pady=(0, 5))
 
-        productos_frame = tk.Frame(form_frame, bg='white')
-        productos_frame.grid(row=3, column=0, sticky='ew')
-        productos_frame.grid_columnconfigure((0, 1), weight=1)
+        obs_entry = ctk.CTkEntry(form_content, textvariable=self.observaciones_var,
+                                font=("Segoe UI", 10),
+                                height=32, corner_radius=8,
+                                border_width=1, border_color='#dee2e6')
+        obs_entry.pack(fill='x', pady=(0, 15))
+
+        # Divisor
+        ctk.CTkFrame(form_content, fg_color='#e9ecef', height=2).pack(fill='x', pady=(5, 15))
+
+        # Sección productos
+        ctk.CTkLabel(form_content, text="🛒 Agregar Productos",
+                    font=("Segoe UI", 12, "bold"),
+                    text_color='#667eea').pack(anchor='w', pady=(0, 10))
 
         # Producto
-        tk.Label(productos_frame, text="Producto:", **label_style).grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 5))
-        self.producto_combo = ttk.Combobox(productos_frame, textvariable=self.producto_var,
-                                          state="readonly", font=('Segoe UI', 10))
-        self.producto_combo.grid(row=1, column=0, columnspan=2, sticky='ew', pady=(0, 10))
+        ctk.CTkLabel(form_content, text="📦 Producto:",
+                    font=("Segoe UI", 10, "bold"),
+                    text_color='#667eea').pack(anchor='w', pady=(0, 5))
+
+        self.producto_combo = ttk.Combobox(form_content, textvariable=self.producto_var,
+                                          state="readonly", font=("Segoe UI", 10))
+        self.producto_combo.pack(fill='x', pady=(0, 15), ipady=4)
         self.producto_combo.bind('<<ComboboxSelected>>', self.producto_seleccionado)
 
-        # Cantidad y Precio
-        tk.Label(productos_frame, text="Cantidad:", **label_style).grid(row=2, column=0, sticky='w', pady=(0, 5))
-        tk.Entry(productos_frame, textvariable=self.cantidad_var, width=12, **entry_style).grid(
-            row=3, column=0, sticky='ew', padx=(0, 10))
+        # Grid para cantidad y precio
+        grid_frame = ctk.CTkFrame(form_content, fg_color='transparent')
+        grid_frame.pack(fill='x', pady=(0, 15))
+        grid_frame.grid_columnconfigure(0, weight=1)
+        grid_frame.grid_columnconfigure(1, weight=1)
 
-        tk.Label(productos_frame, text="Precio Unit.:", **label_style).grid(row=2, column=1, sticky='w', pady=(0, 5))
-        tk.Entry(productos_frame, textvariable=self.precio_var, width=12, **entry_style).grid(
-            row=3, column=1, sticky='ew')
+        # Cantidad
+        cantidad_frame = ctk.CTkFrame(grid_frame, fg_color='transparent')
+        cantidad_frame.grid(row=0, column=0, sticky='ew', padx=(0, 10))
+
+        ctk.CTkLabel(cantidad_frame, text="🔢 Cantidad:",
+                    font=("Segoe UI", 10, "bold"),
+                    text_color='#667eea').pack(anchor='w', pady=(0, 5))
+
+        cantidad_entry = ctk.CTkEntry(cantidad_frame, textvariable=self.cantidad_var,
+                                     font=("Segoe UI", 10),
+                                     height=32, corner_radius=8,
+                                     border_width=1, border_color='#dee2e6')
+        cantidad_entry.pack(fill='x')
+
+        # Precio
+        precio_frame = ctk.CTkFrame(grid_frame, fg_color='transparent')
+        precio_frame.grid(row=0, column=1, sticky='ew')
+
+        ctk.CTkLabel(precio_frame, text="💵 Precio Unit.:",
+                    font=("Segoe UI", 10, "bold"),
+                    text_color='#667eea').pack(anchor='w', pady=(0, 5))
+
+        precio_entry = ctk.CTkEntry(precio_frame, textvariable=self.precio_var,
+                                   font=("Segoe UI", 10),
+                                   height=32, corner_radius=8,
+                                   border_width=1, border_color='#dee2e6')
+        precio_entry.pack(fill='x')
 
         # Botón agregar
-        btn_agregar = tk.Button(form_frame, text="+ Agregar al Carrito",
-                               font=("Segoe UI", 10, "bold"), fg='white', bg='#27ae60',
-                               relief='flat', cursor='hand2', pady=8,
-                               command=self.agregar_al_carrito)
-        btn_agregar.grid(row=4, column=0, pady=15)
-
-        # Efecto hover
-        def on_enter(e): btn_agregar.configure(relief='raised', bg='#229954')
-        def on_leave(e): btn_agregar.configure(relief='flat', bg='#27ae60')
-        btn_agregar.bind('<Enter>', on_enter)
-        btn_agregar.bind('<Leave>', on_leave)
+        btn_agregar = ctk.CTkButton(form_content, text="+ Agregar al Carrito",
+                                    fg_color='#27ae60',
+                                    hover_color='#229954',
+                                    font=("Segoe UI", 11, "bold"),
+                                    height=38, corner_radius=10,
+                                    command=self.agregar_al_carrito)
+        btn_agregar.pack(fill='x', pady=(5, 0))
 
         # Cargar combos
         self.cargar_combos_iniciales()
 
-    def crear_carrito_elegante(self, parent):
-        """Crear carrito elegante"""
-        # Marco del carrito
-        cart_frame = tk.LabelFrame(parent, text="   Carrito de Compras   ",
-                                  font=("Segoe UI", 13, "bold"), fg='#2c3e50',
-                                  bg='white', relief='solid', bd=1, padx=15, pady=10)
-        cart_frame.grid(row=1, column=0, sticky='nsew')
-        cart_frame.grid_rowconfigure(0, weight=1)
-        cart_frame.grid_columnconfigure(0, weight=1)
+    def crear_carrito(self, parent):
+        """Crear carrito de compras moderno"""
+        # Card del carrito
+        cart_card = ctk.CTkFrame(parent, fg_color='white', corner_radius=12,
+                                border_width=1, border_color='#e9ecef')
+        cart_card.grid(row=1, column=0, sticky='nsew')
+
+        # Header
+        header_cart = ctk.CTkFrame(cart_card, fg_color='#667eea', height=50, corner_radius=10)
+        header_cart.pack(fill='x', padx=2, pady=2)
+        header_cart.pack_propagate(False)
+
+        ctk.CTkLabel(header_cart, text="🛒 Carrito de Compras",
+                    font=("Segoe UI", 14, "bold"),
+                    text_color='white').pack(expand=True)
 
         # Container del treeview
-        tree_container = tk.Frame(cart_frame, bg='white')
-        tree_container.grid(row=0, column=0, sticky='nsew', pady=(10, 0))
-        tree_container.grid_rowconfigure(0, weight=1)
-        tree_container.grid_columnconfigure(0, weight=1)
+        tree_container = tk.Frame(cart_card, bg='white')
+        tree_container.pack(fill='both', expand=True, padx=15, pady=(10, 10))
 
-        # Estilo del carrito
+        # Estilo
         style = ttk.Style()
         style.configure("Carrito.Treeview",
                        background="#ffffff",
                        foreground="#2c3e50",
                        fieldbackground="#ffffff",
-                       font=("Segoe UI", 9),
-                       rowheight=28)
+                       font=("Segoe UI", 10),
+                       rowheight=32)
+
         style.configure("Carrito.Treeview.Heading",
-                       background="#34495e",
+                       background="#667eea",
                        foreground="white",
                        font=("Segoe UI", 10, "bold"))
 
-        # Treeview del carrito
+        # Treeview
         columns = ('Producto', 'Cant.', 'P.Unit', 'Subtotal')
         self.tree_carrito = ttk.Treeview(tree_container, columns=columns, show='headings',
-                                        height=8, style="Carrito.Treeview")
+                                        height=10, style="Carrito.Treeview")
 
-        # Configurar columnas
         self.tree_carrito.heading('Producto', text='Producto')
         self.tree_carrito.heading('Cant.', text='Cant.')
         self.tree_carrito.heading('P.Unit', text='P.Unit')
         self.tree_carrito.heading('Subtotal', text='Subtotal')
 
-        self.tree_carrito.column('Producto', width=140, anchor='w')
-        self.tree_carrito.column('Cant.', width=50, anchor='center')
-        self.tree_carrito.column('P.Unit', width=70, anchor='center')
-        self.tree_carrito.column('Subtotal', width=80, anchor='center')
+        self.tree_carrito.column('Producto', width=180, anchor='w')
+        self.tree_carrito.column('Cant.', width=60, anchor='center')
+        self.tree_carrito.column('P.Unit', width=80, anchor='center')
+        self.tree_carrito.column('Subtotal', width=90, anchor='center')
 
         # Scrollbar
-        cart_scrollbar = ttk.Scrollbar(tree_container, orient='vertical', command=self.tree_carrito.yview)
+        cart_scrollbar = ttk.Scrollbar(tree_container, orient='vertical',
+                                      command=self.tree_carrito.yview)
         self.tree_carrito.configure(yscrollcommand=cart_scrollbar.set)
 
-        self.tree_carrito.grid(row=0, column=0, sticky='nsew')
-        cart_scrollbar.grid(row=0, column=1, sticky='ns')
+        self.tree_carrito.pack(side='left', fill='both', expand=True)
+        cart_scrollbar.pack(side='right', fill='y')
 
-        # Panel inferior del carrito
-        bottom_panel = tk.Frame(cart_frame, bg='white')
-        bottom_panel.grid(row=1, column=0, sticky='ew', pady=(15, 5))
-        bottom_panel.grid_columnconfigure(1, weight=1)
+        # Panel inferior
+        bottom_panel = ctk.CTkFrame(cart_card, fg_color='white')
+        bottom_panel.pack(fill='x', padx=15, pady=(5, 15))
 
-        # Botones del carrito
-        btn_quitar = tk.Button(bottom_panel, text="Quitar", font=("Segoe UI", 9, "bold"),
-                              fg='white', bg='#e74c3c', relief='flat', cursor='hand2',
-                              padx=12, command=self.quitar_del_carrito)
-        btn_quitar.grid(row=0, column=0, padx=(0, 5))
+        # Botones
+        btn_frame = ctk.CTkFrame(bottom_panel, fg_color='transparent')
+        btn_frame.pack(side='left')
 
-        btn_limpiar = tk.Button(bottom_panel, text="Limpiar", font=("Segoe UI", 9, "bold"),
-                               fg='white', bg='#f39c12', relief='flat', cursor='hand2',
-                               padx=12, command=self.limpiar_carrito)
-        btn_limpiar.grid(row=0, column=1, padx=5)
+        btn_quitar = ctk.CTkButton(btn_frame, text="🗑️ Quitar",
+                                  fg_color='#ff3838',
+                                  hover_color='#e62020',
+                                  font=("Segoe UI", 10, "bold"),
+                                  width=100, height=32,
+                                  corner_radius=8,
+                                  command=self.quitar_del_carrito)
+        btn_quitar.pack(side='left', padx=(0, 8))
+
+        btn_limpiar = ctk.CTkButton(btn_frame, text="🧹 Limpiar",
+                                   fg_color='#f39c12',
+                                   hover_color='#e67e22',
+                                   font=("Segoe UI", 10, "bold"),
+                                   width=100, height=32,
+                                   corner_radius=8,
+                                   command=self.limpiar_carrito)
+        btn_limpiar.pack(side='left')
 
         # Total
-        total_frame = tk.Frame(bottom_panel, bg='#2c3e50', relief='solid', bd=1)
-        total_frame.grid(row=0, column=2, padx=(10, 0))
+        total_frame = ctk.CTkFrame(bottom_panel, fg_color='#667eea', corner_radius=8)
+        total_frame.pack(side='right')
 
         self.total_var = tk.StringVar(value="Total: $0")
-        tk.Label(total_frame, textvariable=self.total_var,
-                font=("Segoe UI", 11, "bold"), fg='white', bg='#2c3e50').pack(padx=12, pady=6)
+        ctk.CTkLabel(total_frame, textvariable=self.total_var,
+                    font=("Segoe UI", 12, "bold"),
+                    text_color='white').pack(padx=15, pady=8)
 
-        # Efectos hover
-        def crear_hover_efecto(btn, normal, hover):
-            def enter(e): btn.configure(relief='raised', bg=hover)
-            def leave(e): btn.configure(relief='flat', bg=normal)
-            btn.bind('<Enter>', enter)
-            btn.bind('<Leave>', leave)
+    def crear_columna_derecha(self, parent):
+        """Crear columna derecha con lista de ventas"""
+        # Card de ventas
+        ventas_card = ctk.CTkFrame(parent, fg_color='white', corner_radius=12,
+                                  border_width=1, border_color='#e9ecef')
+        ventas_card.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
-        crear_hover_efecto(btn_quitar, '#e74c3c', '#c0392b')
-        crear_hover_efecto(btn_limpiar, '#f39c12', '#e67e22')
+        # Header
+        header_ventas = ctk.CTkFrame(ventas_card, fg_color='#667eea', height=50, corner_radius=10)
+        header_ventas.pack(fill='x', padx=2, pady=2)
+        header_ventas.pack_propagate(False)
 
-    def crear_lista_ventas_elegante(self, parent):
-        """Crear lista elegante de ventas"""
-        # Marco de la lista
-        list_frame = tk.LabelFrame(parent, text="   Historial de Ventas   ",
-                                  font=("Segoe UI", 13, "bold"), fg='#2c3e50',
-                                  bg='white', relief='solid', bd=1, padx=15, pady=10)
-        list_frame.grid(row=0, column=0, sticky='nsew')
-        list_frame.grid_rowconfigure(1, weight=1)
-        list_frame.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(header_ventas, text="📊 Historial de Ventas",
+                    font=("Segoe UI", 14, "bold"),
+                    text_color='white').pack(expand=True)
 
-        # Info header
-        info_frame = tk.Frame(list_frame, bg='white')
-        info_frame.grid(row=0, column=0, sticky='ew', pady=(10, 5))
-
-        tk.Label(info_frame, text="Doble clic para ver detalles de la venta",
-                font=("Segoe UI", 9, "italic"), fg='#7f8c8d', bg='white').pack(side='left')
+        # Info
+        info_label = ctk.CTkLabel(ventas_card,
+                                 text="💡 Doble clic para ver detalles de la venta",
+                                 font=("Segoe UI", 9, "italic"),
+                                 text_color='#6c757d')
+        info_label.pack(pady=(10, 5))
 
         # Container del treeview
-        tree_container = tk.Frame(list_frame, bg='white')
-        tree_container.grid(row=1, column=0, sticky='nsew', pady=(0, 10))
-        tree_container.grid_rowconfigure(0, weight=1)
-        tree_container.grid_columnconfigure(0, weight=1)
+        tree_container = tk.Frame(ventas_card, bg='white')
+        tree_container.pack(fill='both', expand=True, padx=15, pady=(0, 15))
 
-        # Estilo de ventas
+        # Estilo
         style = ttk.Style()
         style.configure("Ventas.Treeview",
                        background="#ffffff",
                        foreground="#2c3e50",
                        fieldbackground="#ffffff",
-                       font=("Segoe UI", 9),
-                       rowheight=30)
+                       font=("Segoe UI", 10),
+                       rowheight=35)
+
         style.configure("Ventas.Treeview.Heading",
-                       background="#3498db",
+                       background="#667eea",
                        foreground="white",
                        font=("Segoe UI", 10, "bold"))
 
-        # Treeview de ventas
+        style.map('Ventas.Treeview',
+                 background=[('selected', '#667eea')],
+                 foreground=[('selected', 'white')])
+
+        # Treeview
         columns = ('ID', 'Cliente', 'Total', 'Fecha', 'Observaciones')
         self.tree = ttk.Treeview(tree_container, columns=columns, show='headings',
                                 style="Ventas.Treeview")
 
-        # Configurar columnas
         headers = {
             'ID': ('ID', 60),
-            'Cliente': ('Cliente', 180),
-            'Total': ('Total', 100),
-            'Fecha': ('Fecha', 120),
-            'Observaciones': ('Observaciones', 200)
+            'Cliente': ('Cliente', 200),
+            'Total': ('Total', 110),
+            'Fecha': ('Fecha', 130),
+            'Observaciones': ('Observaciones', 180)
         }
 
         for col, (text, width) in headers.items():
             self.tree.heading(col, text=text)
-            self.tree.column(col, width=width, anchor='center' if col in ['ID', 'Total'] else 'w')
+            anchor = 'center' if col in ['ID', 'Total'] else 'w'
+            self.tree.column(col, width=width, anchor=anchor)
 
         # Scrollbars
         v_scrollbar = ttk.Scrollbar(tree_container, orient='vertical', command=self.tree.yview)
@@ -380,70 +455,61 @@ class VentanaVentas:
         v_scrollbar.grid(row=0, column=1, sticky='ns')
         h_scrollbar.grid(row=1, column=0, sticky='ew')
 
+        tree_container.grid_rowconfigure(0, weight=1)
+        tree_container.grid_columnconfigure(0, weight=1)
+
         # Evento doble clic
         self.tree.bind('<Double-1>', self.ver_detalle_venta)
 
     def crear_botones_principales(self, parent):
-        """Crear botones principales con diseño elegante"""
-        # Panel de botones
-        buttons_panel = tk.Frame(parent, bg='#f4f6f9')
-        buttons_panel.grid(row=2, column=0, columnspan=2, pady=(25, 0))
+        """Crear botones principales"""
+        botones_panel = ctk.CTkFrame(parent, fg_color='#f0f2f5', corner_radius=0)
+        botones_panel.grid(row=1, column=0, columnspan=2, pady=(20, 0))
 
-        # Contenedor centrado
-        center_container = tk.Frame(buttons_panel, bg='#f4f6f9')
-        center_container.pack()
+        botones_container = ctk.CTkFrame(botones_panel, fg_color='transparent')
+        botones_container.pack()
 
-        # Función para crear botones elegantes
-        def crear_boton_elegante(texto, color, comando, destacado=False):
-            width = 16 if destacado else 12
-            pady = 12 if destacado else 8
-            font_size = 11 if destacado else 10
+        # Botones
+        botones = [
+            ("✓ PROCESAR VENTA", '#27ae60', '#229954', self.procesar_venta, 180, 45),
+            ("👁 Ver Detalle", '#00a8ff', '#0088cc', self.ver_detalle_venta, 140, 40),
+            ("🗑️ Eliminar Venta", '#ff3838', '#e62020', self.eliminar_venta, 150, 40),
+            ("🔄 Actualizar", '#9b59b6', '#8e44ad', self.cargar_ventas, 130, 40),
+            ("✖ Cerrar", '#95a5a6', '#7f8c8d', self.cerrar_ventana, 120, 40)
+        ]
 
-            btn = tk.Button(center_container, text=texto,
-                           font=("Segoe UI", font_size, "bold"), fg='white', bg=color,
-                           relief='flat', cursor='hand2', width=width, pady=pady,
-                           command=comando)
-            btn.pack(side='left', padx=12)
-
-            # Crear efecto hover
-            hover_color = self.obtener_color_hover(color)
-            def on_enter(e): btn.configure(relief='raised', bg=hover_color)
-            def on_leave(e): btn.configure(relief='flat', bg=color)
-            btn.bind('<Enter>', on_enter)
-            btn.bind('<Leave>', on_leave)
-
-            return btn
-
-        # Botones principales
-        crear_boton_elegante("PROCESAR VENTA", "#27ae60", self.procesar_venta, destacado=True)
-        crear_boton_elegante("Ver Detalle", "#3498db", self.ver_detalle_venta)
-        crear_boton_elegante("Eliminar Venta", "#e74c3c", self.eliminar_venta)
-        crear_boton_elegante("Actualizar Lista", "#9b59b6", self.cargar_ventas)
-        crear_boton_elegante("Cerrar", "#95a5a6", self.cerrar_ventana)
-
-    def obtener_color_hover(self, color):
-        """Obtener color más oscuro para hover"""
-        colores = {
-            "#27ae60": "#229954",
-            "#3498db": "#2980b9",
-            "#e74c3c": "#c0392b",
-            "#9b59b6": "#8e44ad",
-            "#95a5a6": "#7f8c8d"
-        }
-        return colores.get(color, color)
+        for texto, color, hover, comando, ancho, alto in botones:
+            btn = ctk.CTkButton(botones_container, text=texto,
+                               fg_color=color,
+                               hover_color=hover,
+                               font=("Segoe UI", 11, "bold"),
+                               width=ancho, height=alto,
+                               corner_radius=10,
+                               command=comando)
+            btn.pack(side='left', padx=8)
 
     def cargar_combos_iniciales(self):
         """Cargar datos en los combos"""
         try:
-            # Cargar clientes
+            # Clientes
             clientes_nombres = [f"{c.id} - {c.nombre} {c.apellido}" for c in self.clientes_disponibles]
+            clientes_nombres.sort(key=lambda x: x.split(' - ')[1])
             self.cliente_combo['values'] = clientes_nombres
 
-            # Cargar productos
-            productos_nombres = [f"{p.id} - {p.nombre} (Stock: {p.stock}) - ${p.precio_venta:.0f}"
-                               for p in self.productos_disponibles]
-            self.producto_combo['values'] = productos_nombres
-        except:
+            # Productos
+            from models.producto import Producto
+            productos_todos = Producto.obtener_todos()
+            productos_formateados = []
+
+            for producto in productos_todos:
+                sku_display = producto.sku if producto.sku else "SIN-SKU"
+                formato = f"{producto.id} - {sku_display} - {producto.nombre} (Stock: {producto.stock}) - ${producto.precio_venta:.0f}"
+                productos_formateados.append(formato)
+
+            self.producto_combo['values'] = productos_formateados
+
+        except Exception as e:
+            print(f"ERROR al cargar combos: {str(e)}")
             self.cliente_combo['values'] = []
             self.producto_combo['values'] = []
 
@@ -495,7 +561,6 @@ class VentanaVentas:
                 f"${subtotal:.2f}"
             ))
 
-            # Agregar a lista interna
             self.carrito.append({
                 'producto_id': producto_id,
                 'producto': producto,
@@ -504,7 +569,6 @@ class VentanaVentas:
                 'subtotal': subtotal
             })
 
-            # Actualizar total
             self.actualizar_total()
 
             # Limpiar campos
@@ -559,7 +623,6 @@ class VentanaVentas:
         try:
             cliente_id = int(self.cliente_var.get().split(' - ')[0])
 
-            # Preparar detalles de venta
             detalles_venta = []
             for item in self.carrito:
                 detalles_venta.append({
@@ -568,16 +631,26 @@ class VentanaVentas:
                     'precio_unitario': item['precio']
                 })
 
-            # Procesar venta
-            if self.controller.crear_venta(cliente_id, detalles_venta, self.observaciones_var.get()):
+            if self.controller.crear_venta(cliente_id, detalles_venta, self.observaciones_var.get(), self.numero_recibo_var.get()):
                 self.limpiar_formulario_venta()
                 self.cargar_ventas()
-                # Recargar productos por si cambió el stock
                 self.cargar_datos_iniciales()
                 self.cargar_combos_iniciales()
+                # Actualizar estadísticas después de registrar venta
+                self.actualizar_estadisticas()
 
         except Exception as e:
             messagebox.showerror("Error", f"Error al procesar venta: {str(e)}")
+
+    def generar_numero_recibo(self):
+        """Generar número de recibo automático"""
+        try:
+            numero_recibo = self.controller.generar_numero_recibo()
+            self.numero_recibo_var.set(numero_recibo)
+        except Exception as e:
+            print(f"Error al generar número de recibo: {str(e)}")
+            from datetime import datetime
+            self.numero_recibo_var.set(f"REC-{datetime.now().strftime('%Y%m%d')}-0001")
 
     def limpiar_formulario_venta(self):
         """Limpiar formulario de venta"""
@@ -587,20 +660,20 @@ class VentanaVentas:
         self.cantidad_var.set('')
         self.precio_var.set('')
 
-        # Limpiar carrito
+        # Generar nuevo número de recibo
+        self.generar_numero_recibo()
+
         for item in self.tree_carrito.get_children():
             self.tree_carrito.delete(item)
         self.carrito.clear()
         self.actualizar_total()
 
     def cargar_ventas(self):
-        """Cargar ventas en la lista - CORREGIDO"""
+        """Cargar ventas en la lista"""
         try:
-            # Limpiar lista
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
-            # Obtener ventas usando método corregido
             from config.database import DatabaseManager
             db = DatabaseManager()
 
@@ -621,13 +694,11 @@ class VentanaVentas:
                     fecha_venta = fila[3]
                     observaciones = fila[4] or ""
 
-                    # Obtener nombre del cliente
-                    if fila[5] and fila[6]:  # Si hay nombre y apellido
+                    if fila[5] and fila[6]:
                         cliente_nombre = f"{fila[5]} {fila[6]}"
                     else:
                         cliente_nombre = "Cliente no encontrado"
 
-                    # Formatear fecha
                     try:
                         if isinstance(fecha_venta, str):
                             from datetime import datetime
@@ -650,7 +721,7 @@ class VentanaVentas:
             messagebox.showerror("Error", f"Error al cargar ventas: {str(e)}")
 
     def ver_detalle_venta(self, event=None):
-        """Ver detalle completo de venta seleccionada"""
+        """Ver detalle de venta seleccionada"""
         seleccion = self.tree.selection()
         if not seleccion:
             messagebox.showwarning("Advertencia", "Seleccione una venta para ver su detalle")
@@ -659,20 +730,17 @@ class VentanaVentas:
         item = self.tree.item(seleccion[0])
         venta_id = item['values'][0]
 
-        # Crear ventana de detalle
         self.mostrar_ventana_detalle_venta(venta_id)
 
     def mostrar_ventana_detalle_venta(self, venta_id):
-        """Mostrar ventana completa con detalle de venta"""
-        # Crear ventana
+        """Mostrar ventana con detalle de venta"""
         detalle_window = tk.Toplevel(self.ventana)
         detalle_window.title(f"Detalle de Venta #{venta_id}")
         detalle_window.geometry("1200x800")
-        detalle_window.configure(bg='#f4f6f9')
+        detalle_window.configure(bg='#f0f2f5')
         detalle_window.transient(self.ventana)
         detalle_window.grab_set()
 
-        # Obtener datos de la venta
         try:
             venta_datos = self.obtener_datos_completos_venta(venta_id)
             if not venta_datos:
@@ -684,10 +752,7 @@ class VentanaVentas:
             detalle_window.destroy()
             return
 
-        # Crear header de la ventana
         self.crear_header_detalle(detalle_window, venta_datos)
-
-        # Crear contenido principal en pestañas
         self.crear_contenido_detalle(detalle_window, venta_datos)
 
     def obtener_datos_completos_venta(self, venta_id):
@@ -695,7 +760,6 @@ class VentanaVentas:
         from config.database import DatabaseManager
         db = DatabaseManager()
 
-        # Datos básicos de la venta
         query_venta = '''
             SELECT v.id, v.cliente_id, v.total, v.fecha_venta, v.observaciones,
                    c.nombre, c.apellido, c.telefono, c.email, c.direccion
@@ -709,7 +773,6 @@ class VentanaVentas:
 
         venta_data = venta_info[0]
 
-        # Detalles de productos vendidos
         query_detalle = '''
             SELECT dv.producto_id, dv.cantidad, dv.precio_unitario, dv.subtotal,
                    p.nombre, p.descripcion, p.categoria
@@ -719,7 +782,6 @@ class VentanaVentas:
         '''
         productos = db.ejecutar_consulta(query_detalle, (venta_id,))
 
-        # Estado de cuenta del cliente
         query_cuenta = '''
             SELECT saldo_total, saldo_pendiente, fecha_ultima_actualizacion
             FROM cuentas_corrientes
@@ -727,7 +789,6 @@ class VentanaVentas:
         '''
         cuenta_info = db.ejecutar_consulta(query_cuenta, (venta_data[1],))
 
-        # Abonos del cliente
         query_abonos = '''
             SELECT monto_abono, metodo_pago, descripcion, fecha_abono, recibo_numero
             FROM abonos
@@ -755,46 +816,44 @@ class VentanaVentas:
         }
 
     def crear_header_detalle(self, parent, datos):
-        """Crear header elegante para la ventana de detalle"""
-        header_frame = tk.Frame(parent, bg='#2c3e50', height=120)
+        """Crear header para ventana de detalle"""
+        header_frame = ctk.CTkFrame(parent, fg_color=("#667eea", "#764ba2"),
+                                    height=100, corner_radius=0)
         header_frame.pack(fill='x')
         header_frame.pack_propagate(False)
 
-        # Título principal
-        title_frame = tk.Frame(header_frame, bg='#2c3e50')
-        title_frame.pack(expand=True, fill='both')
+        title_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        title_frame.pack(expand=True)
 
-        tk.Label(title_frame, text=f"DETALLE DE VENTA #{datos['venta']['id']}",
-                font=("Segoe UI", 20, "bold"), fg='#ecf0f1', bg='#2c3e50').pack(expand=True)
+        ctk.CTkLabel(title_frame, text=f"DETALLE DE VENTA #{datos['venta']['id']}",
+                    font=("Segoe UI", 20, "bold"),
+                    text_color='white').pack(expand=True)
 
-        info_frame = tk.Frame(title_frame, bg='#2c3e50')
+        info_frame = ctk.CTkFrame(title_frame, fg_color="transparent")
         info_frame.pack()
 
-        tk.Label(info_frame, text=f"Cliente: {datos['venta']['cliente_nombre']}",
-                font=("Segoe UI", 12), fg='#bdc3c7', bg='#2c3e50').pack(side='left', padx=20)
+        ctk.CTkLabel(info_frame, text=f"Cliente: {datos['venta']['cliente_nombre']}",
+                    font=("Segoe UI", 12),
+                    text_color='white').pack(side='left', padx=20)
 
-        tk.Label(info_frame, text=f"Total: ${datos['venta']['total']:,.2f}",
-                font=("Segoe UI", 12, "bold"), fg='#27ae60', bg='#2c3e50').pack(side='left', padx=20)
+        ctk.CTkLabel(info_frame, text=f"Total: ${datos['venta']['total']:,.2f}",
+                    font=("Segoe UI", 12, "bold"),
+                    text_color='#2ecc71').pack(side='left', padx=20)
 
-        tk.Label(info_frame, text=f"Fecha: {datos['venta']['fecha_venta']}",
-                font=("Segoe UI", 12), fg='#bdc3c7', bg='#2c3e50').pack(side='left', padx=20)
+        ctk.CTkLabel(info_frame, text=f"Fecha: {datos['venta']['fecha_venta']}",
+                    font=("Segoe UI", 12),
+                    text_color='white').pack(side='left', padx=20)
 
     def crear_contenido_detalle(self, parent, datos):
-        """Crear contenido principal con pestañas"""
-        main_frame = tk.Frame(parent, bg='#f4f6f9')
+        """Crear contenido con pestañas"""
+        main_frame = ctk.CTkFrame(parent, fg_color='#f0f2f5', corner_radius=0)
         main_frame.pack(fill='both', expand=True, padx=20, pady=20)
 
-        # Crear notebook para pestañas
         notebook = ttk.Notebook(main_frame)
         notebook.pack(fill='both', expand=True)
 
-        # Pestaña 1: Productos vendidos
         self.crear_pestaña_productos_vendidos(notebook, datos)
-
-        # Pestaña 2: Estado de cuenta
         self.crear_pestaña_estado_cuenta(notebook, datos)
-
-        # Pestaña 3: Información del cliente
         self.crear_pestaña_info_cliente(notebook, datos)
 
     def crear_pestaña_productos_vendidos(self, notebook, datos):
@@ -802,19 +861,17 @@ class VentanaVentas:
         frame = ttk.Frame(notebook)
         notebook.add(frame, text="🛒 Productos Vendidos")
 
-        # Frame principal
-        main_frame = tk.Frame(frame, bg='white', relief='solid', bd=1)
+        main_frame = ctk.CTkFrame(frame, fg_color='white', corner_radius=12,
+                                 border_width=1, border_color='#e9ecef')
         main_frame.pack(fill='both', expand=True, padx=15, pady=15)
 
-        # Título
-        tk.Label(main_frame, text="Productos incluidos en esta venta",
-                font=("Segoe UI", 14, "bold"), fg='#2c3e50', bg='white').pack(pady=(15, 20))
+        ctk.CTkLabel(main_frame, text="Productos incluidos en esta venta",
+                    font=("Segoe UI", 14, "bold"),
+                    text_color='#2c3e50').pack(pady=(15, 20))
 
-        # Crear tabla de productos
         tree_frame = tk.Frame(main_frame, bg='white')
         tree_frame.pack(fill='both', expand=True, padx=15, pady=(0, 15))
 
-        # Configurar estilo
         style = ttk.Style()
         style.configure("Detalle.Treeview",
                        background="white",
@@ -823,113 +880,95 @@ class VentanaVentas:
                        font=("Segoe UI", 10),
                        rowheight=30)
         style.configure("Detalle.Treeview.Heading",
-                       background="#3498db",
+                       background="#667eea",
                        foreground="white",
                        font=("Segoe UI", 11, "bold"))
 
-        # Treeview
         columns = ('Producto', 'Categoría', 'Cantidad', 'Precio Unit.', 'Subtotal')
         tree_productos = ttk.Treeview(tree_frame, columns=columns, show='headings',
                                      style="Detalle.Treeview")
 
-        # Headers
         tree_productos.heading('Producto', text='Producto')
         tree_productos.heading('Categoría', text='Categoría')
         tree_productos.heading('Cantidad', text='Cantidad')
         tree_productos.heading('Precio Unit.', text='Precio Unit.')
         tree_productos.heading('Subtotal', text='Subtotal')
 
-        # Configurar columnas
         tree_productos.column('Producto', width=200, anchor='w')
         tree_productos.column('Categoría', width=120, anchor='center')
         tree_productos.column('Cantidad', width=80, anchor='center')
         tree_productos.column('Precio Unit.', width=100, anchor='center')
         tree_productos.column('Subtotal', width=100, anchor='center')
 
-        # Cargar datos
         total_productos = 0
         for producto in datos['productos']:
             tree_productos.insert('', 'end', values=(
-                producto[4],  # nombre
-                producto[6] or 'Sin categoría',  # categoría
-                f"{producto[1]:,}",  # cantidad
-                f"${producto[2]:,.2f}",  # precio unitario
-                f"${producto[3]:,.2f}"  # subtotal
+                producto[4],
+                producto[6] or 'Sin categoría',
+                f"{producto[1]:,}",
+                f"${producto[2]:,.2f}",
+                f"${producto[3]:,.2f}"
             ))
             total_productos += producto[1]
 
-        # Scrollbar
         scrollbar = ttk.Scrollbar(tree_frame, orient='vertical', command=tree_productos.yview)
         tree_productos.configure(yscrollcommand=scrollbar.set)
 
         tree_productos.pack(side='left', fill='both', expand=True)
         scrollbar.pack(side='right', fill='y')
 
-        # Resumen
-        resumen_frame = tk.Frame(main_frame, bg='#ecf0f1', relief='solid', bd=1)
+        resumen_frame = ctk.CTkFrame(main_frame, fg_color='#f8f9fa', corner_radius=8)
         resumen_frame.pack(fill='x', padx=15, pady=(0, 15))
 
-        tk.Label(resumen_frame, text=f"Total de productos: {total_productos:,}",
-                font=("Segoe UI", 11, "bold"), fg='#2c3e50', bg='#ecf0f1').pack(side='left', padx=15, pady=10)
+        ctk.CTkLabel(resumen_frame, text=f"Total de productos: {total_productos:,}",
+                    font=("Segoe UI", 11, "bold"),
+                    text_color='#2c3e50').pack(side='left', padx=15, pady=10)
 
-        tk.Label(resumen_frame, text=f"TOTAL VENTA: ${datos['venta']['total']:,.2f}",
-                font=("Segoe UI", 12, "bold"), fg='#27ae60', bg='#ecf0f1').pack(side='right', padx=15, pady=10)
+        ctk.CTkLabel(resumen_frame, text=f"TOTAL VENTA: ${datos['venta']['total']:,.2f}",
+                    font=("Segoe UI", 12, "bold"),
+                    text_color='#27ae60').pack(side='right', padx=15, pady=10)
 
     def crear_pestaña_estado_cuenta(self, notebook, datos):
         """Crear pestaña con estado de cuenta"""
         frame = ttk.Frame(notebook)
         notebook.add(frame, text="💳 Estado de Cuenta")
 
-        # Frame principal
-        main_frame = tk.Frame(frame, bg='white', relief='solid', bd=1)
+        main_frame = ctk.CTkFrame(frame, fg_color='white', corner_radius=12,
+                                 border_width=1, border_color='#e9ecef')
         main_frame.pack(fill='both', expand=True, padx=15, pady=15)
 
-        # Título
-        tk.Label(main_frame, text="Estado de cuenta del cliente",
-                font=("Segoe UI", 14, "bold"), fg='#2c3e50', bg='white').pack(pady=(15, 20))
+        ctk.CTkLabel(main_frame, text="Estado de cuenta del cliente",
+                    font=("Segoe UI", 14, "bold"),
+                    text_color='#2c3e50').pack(pady=(15, 20))
 
-        # Estado actual
-        estado_frame = tk.Frame(main_frame, bg='white')
+        estado_frame = ctk.CTkFrame(main_frame, fg_color='white')
         estado_frame.pack(fill='x', padx=15, pady=(0, 20))
 
-        # Cards de estado
         saldo_total = datos['cuenta'][0]
         saldo_pendiente = datos['cuenta'][1]
         saldo_abonado = saldo_total - saldo_pendiente
 
-        # Card saldo total
-        card1 = tk.Frame(estado_frame, bg='#3498db', relief='raised', bd=2)
-        card1.pack(side='left', fill='x', expand=True, padx=(0, 10))
+        # Cards
+        tarjetas = [
+            ("SALDO TOTAL", f"${saldo_total:,.2f}", '#3498db'),
+            ("ABONADO", f"${saldo_abonado:,.2f}", '#27ae60'),
+            ("PENDIENTE", f"${saldo_pendiente:,.2f}", '#e74c3c')
+        ]
 
-        tk.Label(card1, text="SALDO TOTAL", font=("Segoe UI", 10, "bold"),
-                fg='white', bg='#3498db').pack(pady=(10, 5))
-        tk.Label(card1, text=f"${saldo_total:,.2f}", font=("Segoe UI", 16, "bold"),
-                fg='white', bg='#3498db').pack(pady=(0, 10))
+        for titulo, valor, color in tarjetas:
+            card = ctk.CTkFrame(estado_frame, fg_color=color, corner_radius=10)
+            card.pack(side='left', fill='both', expand=True, padx=10)
 
-        # Card saldo abonado
-        card2 = tk.Frame(estado_frame, bg='#27ae60', relief='raised', bd=2)
-        card2.pack(side='left', fill='x', expand=True, padx=5)
+            ctk.CTkLabel(card, text=titulo, font=("Segoe UI", 10, "bold"),
+                        text_color='white').pack(pady=(15, 5))
+            ctk.CTkLabel(card, text=valor, font=("Segoe UI", 16, "bold"),
+                        text_color='white').pack(pady=(0, 15))
 
-        tk.Label(card2, text="ABONADO", font=("Segoe UI", 10, "bold"),
-                fg='white', bg='#27ae60').pack(pady=(10, 5))
-        tk.Label(card2, text=f"${saldo_abonado:,.2f}", font=("Segoe UI", 16, "bold"),
-                fg='white', bg='#27ae60').pack(pady=(0, 10))
-
-        # Card saldo pendiente
-        card3 = tk.Frame(estado_frame, bg='#e74c3c', relief='raised', bd=2)
-        card3.pack(side='left', fill='x', expand=True, padx=(10, 0))
-
-        tk.Label(card3, text="PENDIENTE", font=("Segoe UI", 10, "bold"),
-                fg='white', bg='#e74c3c').pack(pady=(10, 5))
-        tk.Label(card3, text=f"${saldo_pendiente:,.2f}", font=("Segoe UI", 16, "bold"),
-                fg='white', bg='#e74c3c').pack(pady=(0, 10))
-
-        # Historial de abonos
         if datos['abonos']:
-            tk.Label(main_frame, text="Últimos abonos realizados",
-                    font=("Segoe UI", 12, "bold"), fg='#2c3e50', bg='white').pack(pady=(20, 10))
+            ctk.CTkLabel(main_frame, text="Últimos abonos realizados",
+                        font=("Segoe UI", 12, "bold"),
+                        text_color='#2c3e50').pack(pady=(20, 10))
 
-            # Tabla de abonos
             abonos_frame = tk.Frame(main_frame, bg='white')
             abonos_frame.pack(fill='both', expand=True, padx=15, pady=(0, 15))
 
@@ -937,62 +976,54 @@ class VentanaVentas:
             tree_abonos = ttk.Treeview(abonos_frame, columns=columns_abonos, show='headings',
                                       style="Detalle.Treeview", height=8)
 
-            # Headers
             tree_abonos.heading('Fecha', text='Fecha')
             tree_abonos.heading('Monto', text='Monto')
             tree_abonos.heading('Método', text='Método')
             tree_abonos.heading('Descripción', text='Descripción')
             tree_abonos.heading('Recibo', text='Recibo #')
 
-            # Configurar columnas
             tree_abonos.column('Fecha', width=120, anchor='center')
             tree_abonos.column('Monto', width=100, anchor='center')
             tree_abonos.column('Método', width=100, anchor='center')
             tree_abonos.column('Descripción', width=200, anchor='w')
             tree_abonos.column('Recibo', width=100, anchor='center')
 
-            # Cargar abonos
             for abono in datos['abonos']:
                 tree_abonos.insert('', 'end', values=(
-                    abono[3][:10] if abono[3] else '',  # fecha
-                    f"${abono[0]:,.2f}",  # monto
-                    abono[1] or 'Efectivo',  # método
-                    abono[2] or '',  # descripción
-                    abono[4] or ''  # recibo
+                    abono[3][:10] if abono[3] else '',
+                    f"${abono[0]:,.2f}",
+                    abono[1] or 'Efectivo',
+                    abono[2] or '',
+                    abono[4] or ''
                 ))
 
-            # Scrollbar
             scrollbar_abonos = ttk.Scrollbar(abonos_frame, orient='vertical', command=tree_abonos.yview)
             tree_abonos.configure(yscrollcommand=scrollbar_abonos.set)
 
             tree_abonos.pack(side='left', fill='both', expand=True)
             scrollbar_abonos.pack(side='right', fill='y')
         else:
-            tk.Label(main_frame, text="No hay abonos registrados para este cliente",
-                    font=("Segoe UI", 11, "italic"), fg='#7f8c8d', bg='white').pack(pady=30)
+            ctk.CTkLabel(main_frame, text="No hay abonos registrados para este cliente",
+                        font=("Segoe UI", 11, "italic"),
+                        text_color='#6c757d').pack(pady=30)
 
     def crear_pestaña_info_cliente(self, notebook, datos):
         """Crear pestaña con información del cliente"""
         frame = ttk.Frame(notebook)
         notebook.add(frame, text="👤 Info. Cliente")
 
-        # Frame principal
-        main_frame = tk.Frame(frame, bg='white', relief='solid', bd=1)
+        main_frame = ctk.CTkFrame(frame, fg_color='white', corner_radius=12,
+                                 border_width=1, border_color='#e9ecef')
         main_frame.pack(fill='both', expand=True, padx=15, pady=15)
 
-        # Título
-        tk.Label(main_frame, text="Información del cliente",
-                font=("Segoe UI", 14, "bold"), fg='#2c3e50', bg='white').pack(pady=(15, 30))
+        ctk.CTkLabel(main_frame, text="Información del cliente",
+                    font=("Segoe UI", 14, "bold"),
+                    text_color='#2c3e50').pack(pady=(15, 30))
 
-        # Información del cliente
-        info_frame = tk.Frame(main_frame, bg='white')
+        info_frame = ctk.CTkFrame(main_frame, fg_color='white')
         info_frame.pack(expand=True)
 
         venta = datos['venta']
-
-        # Estilo para etiquetas
-        label_style = {'font': ('Segoe UI', 11, 'bold'), 'fg': '#2c3e50', 'bg': 'white'}
-        value_style = {'font': ('Segoe UI', 11), 'fg': '#34495e', 'bg': 'white'}
 
         info_data = [
             ("Nombre completo:", venta['cliente_nombre']),
@@ -1001,18 +1032,20 @@ class VentanaVentas:
             ("Dirección:", venta['cliente_direccion'] or "No registrada"),
         ]
 
-        for i, (label, value) in enumerate(info_data):
-            row_frame = tk.Frame(info_frame, bg='white')
+        for label, value in info_data:
+            row_frame = ctk.CTkFrame(info_frame, fg_color='transparent')
             row_frame.pack(fill='x', pady=8)
 
-            tk.Label(row_frame, text=label, **label_style).pack(side='left', anchor='w')
-            tk.Label(row_frame, text=value, **value_style).pack(side='left', padx=(20, 0))
+            ctk.CTkLabel(row_frame, text=label, font=('Segoe UI', 11, 'bold'),
+                        text_color='#2c3e50').pack(side='left', anchor='w')
+            ctk.CTkLabel(row_frame, text=value, font=('Segoe UI', 11),
+                        text_color='#34495e').pack(side='left', padx=(20, 0))
 
-        # Información de la venta
-        tk.Label(main_frame, text="Información de esta venta",
-                font=("Segoe UI", 12, "bold"), fg='#2c3e50', bg='white').pack(pady=(40, 20))
+        ctk.CTkLabel(main_frame, text="Información de esta venta",
+                    font=("Segoe UI", 12, "bold"),
+                    text_color='#2c3e50').pack(pady=(40, 20))
 
-        venta_info_frame = tk.Frame(main_frame, bg='#ecf0f1', relief='solid', bd=1)
+        venta_info_frame = ctk.CTkFrame(main_frame, fg_color='#f8f9fa', corner_radius=8)
         venta_info_frame.pack(fill='x', padx=15, pady=(0, 15))
 
         venta_data = [
@@ -1022,13 +1055,13 @@ class VentanaVentas:
         ]
 
         for label, value in venta_data:
-            row_frame = tk.Frame(venta_info_frame, bg='#ecf0f1')
+            row_frame = ctk.CTkFrame(venta_info_frame, fg_color='transparent')
             row_frame.pack(fill='x', pady=5, padx=15)
 
-            tk.Label(row_frame, text=label, font=('Segoe UI', 10, 'bold'),
-                    fg='#2c3e50', bg='#ecf0f1').pack(side='left')
-            tk.Label(row_frame, text=value, font=('Segoe UI', 10),
-                    fg='#34495e', bg='#ecf0f1').pack(side='left', padx=(10, 0))
+            ctk.CTkLabel(row_frame, text=label, font=('Segoe UI', 10, 'bold'),
+                        text_color='#2c3e50').pack(side='left')
+            ctk.CTkLabel(row_frame, text=value, font=('Segoe UI', 10),
+                        text_color='#34495e').pack(side='left', padx=(10, 0))
 
     def eliminar_venta(self):
         """Eliminar venta seleccionada"""
@@ -1042,7 +1075,6 @@ class VentanaVentas:
         cliente = item['values'][1]
         total = item['values'][2]
 
-        # Confirmar eliminación
         respuesta = messagebox.askyesno(
             "Confirmar eliminación",
             f"¿Está seguro de eliminar la venta #{venta_id}?\n\n"

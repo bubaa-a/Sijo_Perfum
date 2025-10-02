@@ -354,11 +354,19 @@ class ReporteController:
             return {}
 
     def obtener_top_clientes(self, limite=10):
-        """Obtener top clientes por compras"""
+        """Obtener top clientes por compras con números de recibo"""
         try:
             query = """
                 SELECT c.nombre, c.apellido, SUM(v.total) as total_compras,
-                       MAX(v.fecha_venta) as ultima_compra
+                       MAX(v.fecha_venta) as ultima_compra,
+                       (SELECT v2.numero_recibo
+                        FROM ventas v2
+                        WHERE v2.cliente_id = c.id
+                        ORDER BY v2.fecha_venta DESC LIMIT 1) as ultimo_recibo_venta,
+                       (SELECT a.recibo_numero
+                        FROM abonos a
+                        WHERE a.cliente_id = c.id
+                        ORDER BY a.fecha_abono DESC LIMIT 1) as ultimo_recibo_abono
                 FROM clientes c
                 JOIN ventas v ON c.id = v.cliente_id
                 WHERE c.activo = 1
@@ -430,7 +438,7 @@ class ReporteController:
         """Obtener ventas en un rango de fechas"""
         try:
             query = """
-                SELECT v.fecha_venta, c.nombre, c.apellido,
+                SELECT v.numero_recibo, v.fecha_venta, c.nombre, c.apellido,
                        COUNT(dv.id) as cantidad_productos, v.total
                 FROM ventas v
                 LEFT JOIN clientes c ON v.cliente_id = c.id
@@ -451,7 +459,7 @@ class ReporteController:
         """Obtener ventas recientes"""
         try:
             query = """
-                SELECT v.fecha_venta, c.nombre, c.apellido,
+                SELECT v.numero_recibo, v.fecha_venta, c.nombre, c.apellido,
                        COUNT(dv.id) as cantidad_productos, v.total
                 FROM ventas v
                 LEFT JOIN clientes c ON v.cliente_id = c.id

@@ -1,0 +1,42 @@
+==================================================
+    SISTEMA DE INVENTARIO PRO - INSTRUCCIONES
+==================================================
+
+📦 CONTENIDO DEL PAQUETE:
+- SistemaInventarioPro.exe (Aplicación principal)
+- INSTRUCCIONES_INSTALACION.txt (Este archivo)
+
+🚀 INSTALACIÓN:
+1. Copie SistemaInventarioPro.exe a cualquier carpeta de su computadora
+2. Recomendamos crear una carpeta como:
+   C:\Programas\SistemaInventarioPro\
+3. ¡Listo! No necesita instalar Python ni otras dependencias
+
+💻 EJECUCIÓN:
+1. Haga doble clic en SistemaInventarioPro.exe
+2. La primera vez puede tomar unos segundos en cargar
+3. La base de datos se creará automáticamente en la misma carpeta
+
+📊 BASE DE DATOS:
+- Se crea automáticamente: inventario.db
+- Contiene todos sus productos, clientes y ventas
+- Para hacer respaldo, copie este archivo
+
+⚠️ IMPORTANTE:
+- Mantenga SistemaInventarioPro.exe e inventario.db en la misma carpeta
+- Para hacer respaldos, copie toda la carpeta
+- El archivo .exe es completamente portable
+
+🔧 FUNCIONALIDADES INCLUIDAS:
+✅ Gestión completa de productos (con Marca, Tipo, Proveedor)
+✅ Control de clientes y cuentas corrientes
+✅ Sistema de ventas con carrito
+✅ Reportes avanzados y dashboard
+✅ Estado de cuenta y pagos
+✅ Análisis de inventario
+
+📧 SOPORTE:
+Para dudas o problemas, contacte al desarrollador.
+
+Versión: 2.0
+Fecha: Septiembre 2024

@@ -1,229 +1,174 @@
 """
-Ventana principal del sistema - Diseño moderno estilo web
+Ventana principal del sistema - Diseño moderno con CustomTkinter
 """
 import tkinter as tk
 from tkinter import ttk, messagebox
+import customtkinter as ctk
 from controllers.producto_controller import ProductoController
 from datetime import datetime
+from config.estilos import Colores, Fuentes, Espaciado, Dimensiones, Iconos, ModuloConfig
 
 class VentanaPrincipal:
     def __init__(self):
-        self.root = tk.Tk()
+        # Configurar CustomTkinter
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("blue")
+
+        # Usar CTk para la ventana principal
+        self.root = ctk.CTk()
         self.root.title("Sistema de Gestión Empresarial Pro")
-        self.root.geometry("1600x1000")
-        self.root.configure(bg='#1a1a2e')
+        self.root.geometry("1400x850")
         self.root.state('zoomed')  # Maximizar ventana
 
         # Controladores
         self.producto_controller = ProductoController()
 
-        # Variables para animaciones
-        self.hover_effects = {}
-
         # Crear interfaz moderna
         self.crear_interfaz_moderna()
 
     def crear_interfaz_moderna(self):
-        """Crear interfaz principal con diseño web moderno"""
-        # Crear canvas principal para efectos de fondo
-        self.crear_fondo_gradiente()
-
-        # Header elegante con glassmorphism
+        """Crear interfaz principal moderna con CustomTkinter"""
+        # Header elegante
         self.crear_header_elegante()
 
         # Dashboard principal con tarjetas modernas
         self.crear_dashboard_principal()
 
-        # Footer con estadísticas en tiempo real
+        # Footer con estadísticas
         self.crear_footer_estadisticas()
 
-    def crear_fondo_gradiente(self):
-        """Crear fondo con efecto gradiente"""
-        # Canvas para el gradiente de fondo
-        self.canvas_fondo = tk.Canvas(self.root, highlightthickness=0)
-        self.canvas_fondo.place(x=0, y=0, relwidth=1, relheight=1)
-
-        # Simular gradiente con rectángulos superpuestos
-        self.actualizar_gradiente()
-
-    def actualizar_gradiente(self):
-        """Actualizar gradiente de fondo"""
-        try:
-            width = self.root.winfo_width()
-            height = self.root.winfo_height()
-
-            if width > 1 and height > 1:
-                self.canvas_fondo.delete("gradient")
-
-                # Crear gradiente desde arriba
-                colors = ['#1a1a2e', '#16213e', '#0f3460', '#533483']
-                steps = len(colors) - 1
-
-                for i in range(steps):
-                    y1 = int(height * i / steps)
-                    y2 = int(height * (i + 1) / steps)
-
-                    self.canvas_fondo.create_rectangle(
-                        0, y1, width, y2,
-                        fill=colors[i], outline=colors[i],
-                        tags="gradient"
-                    )
-        except:
-            pass
-
-        # Reprogramar actualización
-        self.root.after(100, self.actualizar_gradiente)
-
     def crear_header_elegante(self):
-        """Crear header con efecto glassmorphism"""
-        # Frame principal transparente
-        header_frame = tk.Frame(self.root, bg='#16213e', height=120)
-        header_frame.pack(fill='x', pady=(20, 0), padx=20)
+        """Crear header moderno con CustomTkinter y gradiente"""
+        # Header con gradiente usando estilos unificados
+        header_frame = ctk.CTkFrame(
+            self.root,
+            fg_color=(Colores.PRIMARY_START, Colores.PRIMARY_END),
+            height=Dimensiones.HEADER_HEIGHT + 10,
+            corner_radius=0
+        )
+        header_frame.pack(fill='x', pady=(0, 0))
         header_frame.pack_propagate(False)
 
-        # Container interno con bordes redondeados simulados
-        header_content = tk.Frame(header_frame, bg='#0e4b99', relief='flat', bd=0)
-        header_content.pack(fill='both', expand=True, padx=2, pady=2)
+        # Container interno
+        content_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        content_frame.pack(fill='both', expand=True, padx=Espaciado.XXL, pady=Espaciado.MEDIO)
 
-        # Título principal con brillo
-        title_frame = tk.Frame(header_content, bg='#0e4b99')
-        title_frame.pack(expand=True, fill='both')
+        # Sección izquierda - Logo y título
+        left_section = ctk.CTkFrame(content_frame, fg_color="transparent")
+        left_section.pack(side='left', fill='y')
 
-        # Logo/Icono simulado
-        logo_frame = tk.Frame(title_frame, bg='#0e4b99')
-        logo_frame.pack(side='left', padx=40, pady=20)
+        title_label = ctk.CTkLabel(
+            left_section,
+            text=f"{Iconos.EMPRESA} GESTIÓN EMPRESARIAL PRO",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.XXL, Fuentes.BOLD),
+            text_color=Colores.TEXT_WHITE
+        )
+        title_label.pack(anchor='w')
 
-        logo_bg = tk.Frame(logo_frame, bg='#ff6b6b', width=60, height=60, relief='flat')
-        logo_bg.pack_propagate(False)
-        logo_bg.pack()
+        subtitle_label = ctk.CTkLabel(
+            left_section,
+            text="Sistema Integral de Administración",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO+2),
+            text_color="#e8eaf6"
+        )
+        subtitle_label.pack(anchor='w', pady=(3, 0))
 
-        logo_text = tk.Label(logo_bg, text="GP", font=("Segoe UI", 18, "bold"),
-                            fg='white', bg='#ff6b6b')
-        logo_text.place(relx=0.5, rely=0.5, anchor='center')
+        # Sección derecha - Información
+        right_section = ctk.CTkFrame(content_frame, fg_color="transparent")
+        right_section.pack(side='right', fill='y')
 
-        # Títulos centrales
-        title_container = tk.Frame(title_frame, bg='#0e4b99')
-        title_container.pack(side='left', padx=20, pady=20, fill='both', expand=True)
-
-        main_title = tk.Label(title_container, text="GESTIÓN EMPRESARIAL PRO",
-                             font=("Segoe UI", 28, "bold"), fg='#ffffff', bg='#0e4b99')
-        main_title.pack(anchor='w')
-
-        subtitle = tk.Label(title_container, text="🚀 Sistema Integral de Administración Empresarial",
-                           font=("Segoe UI", 12), fg='#4ecdc4', bg='#0e4b99')
-        subtitle.pack(anchor='w', pady=(5, 0))
-
-        tagline = tk.Label(title_container, text="Potenciando tu negocio con tecnología avanzada",
-                          font=("Segoe UI", 10, "italic"), fg='#a8dadc', bg='#0e4b99')
-        tagline.pack(anchor='w', pady=(5, 0))
-
-        # Panel de información derecho
-        info_panel = tk.Frame(title_frame, bg='#0e4b99')
-        info_panel.pack(side='right', padx=40, pady=20)
-
-        # Fecha y hora con estilo
-        fecha_actual = datetime.now().strftime("%d de %B, %Y")
+        # Fecha y hora
+        fecha_actual = datetime.now().strftime("%d/%m/%Y")
         hora_actual = datetime.now().strftime("%H:%M")
 
-        fecha_label = tk.Label(info_panel, text=fecha_actual,
-                              font=("Segoe UI", 11, "bold"), fg='#4ecdc4', bg='#0e4b99')
-        fecha_label.pack(anchor='e')
+        time_label = ctk.CTkLabel(
+            right_section,
+            text=f"{Iconos.HORA} {hora_actual}",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.XL, Fuentes.BOLD),
+            text_color=Colores.TEXT_WHITE
+        )
+        time_label.pack(anchor='e')
 
-        hora_label = tk.Label(info_panel, text=hora_actual,
-                             font=("Segoe UI", 20, "bold"), fg='#ff6b6b', bg='#0e4b99')
-        hora_label.pack(anchor='e', pady=(5, 0))
-
-        status_label = tk.Label(info_panel, text="🟢 Sistema Operativo",
-                               font=("Segoe UI", 9), fg='#4ecdc4', bg='#0e4b99')
-        status_label.pack(anchor='e', pady=(5, 0))
+        date_label = ctk.CTkLabel(
+            right_section,
+            text=fecha_actual,
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.NORMAL),
+            text_color="#e8eaf6"
+        )
+        date_label.pack(anchor='e', pady=(2, 0))
 
     def crear_dashboard_principal(self):
-        """Crear dashboard principal con tarjetas modernas tipo web"""
+        """Crear dashboard principal con CustomTkinter"""
         # Container principal
-        dashboard_frame = tk.Frame(self.root, bg='#1a1a2e')
-        dashboard_frame.pack(fill='both', expand=True, padx=30, pady=30)
+        dashboard_frame = ctk.CTkFrame(self.root, fg_color=Colores.BG_PRIMARY, corner_radius=0)
+        dashboard_frame.pack(fill='both', expand=True, padx=Espaciado.XL, pady=Espaciado.MEDIO)
 
         # Título del dashboard
-        title_frame = tk.Frame(dashboard_frame, bg='#1a1a2e')
-        title_frame.pack(fill='x', pady=(0, 40))
+        title_label = ctk.CTkLabel(
+            dashboard_frame,
+            text="🎯 Centro de Control",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.XL, Fuentes.BOLD),
+            text_color=Colores.TEXT_PRIMARY
+        )
+        title_label.pack(pady=(Espaciado.NORMAL, Espaciado.MUY_PEQUENO))
 
-        title_label = tk.Label(title_frame, text="🎯 CENTRO DE CONTROL",
-                              font=("Segoe UI", 22, "bold"), fg='#ffffff', bg='#1a1a2e')
-        title_label.pack()
+        subtitle_label = ctk.CTkLabel(
+            dashboard_frame,
+            text="Selecciona un módulo para comenzar",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO+2),
+            text_color=Colores.TEXT_SECONDARY
+        )
+        subtitle_label.pack(pady=(0, Espaciado.MEDIO))
 
-        subtitle_label = tk.Label(title_frame, text="Selecciona un módulo para comenzar",
-                                 font=("Segoe UI", 12), fg='#a8dadc', bg='#1a1a2e')
-        subtitle_label.pack(pady=(5, 0))
+        # Grid de tarjetas
+        cards_container = ctk.CTkFrame(dashboard_frame, fg_color="transparent")
+        cards_container.pack(expand=True, fill='both', padx=20, pady=10)
 
-        # Grid de tarjetas modernas
-        cards_container = tk.Frame(dashboard_frame, bg='#1a1a2e')
-        cards_container.pack(expand=True, fill='both')
-
-        # Configurar grid responsivo
+        # Configurar grid
         for i in range(3):
-            cards_container.grid_columnconfigure(i, weight=1, minsize=300)
+            cards_container.grid_columnconfigure(i, weight=1)
         for i in range(2):
-            cards_container.grid_rowconfigure(i, weight=1, minsize=180)
+            cards_container.grid_rowconfigure(i, weight=1)
 
-        # Módulos con iconos modernos
+        # Módulos con iconos modernos usando configuración unificada
         modulos = [
             {
-                'nombre': 'PRODUCTOS',
-                'descripcion': 'Gestión de Inventario',
-                'emoji': '📦',
-                'color_bg': '#4ecdc4',
-                'color_hover': '#45b7b8',
-                'color_text': '#ffffff',
+                **ModuloConfig.PRODUCTOS,
+                'color_text': Colores.TEXT_WHITE,
                 'subtitle': 'Control total de stock',
                 'comando': self.abrir_productos
             },
             {
-                'nombre': 'CLIENTES',
-                'descripcion': 'Base de Datos CRM',
-                'emoji': '👥',
-                'color_bg': '#ff6b6b',
-                'color_hover': '#ee5a52',
-                'color_text': '#ffffff',
+                **ModuloConfig.CLIENTES,
+                'color_text': Colores.TEXT_WHITE,
                 'subtitle': 'Gestión de relaciones',
                 'comando': self.abrir_clientes
             },
             {
-                'nombre': 'VENTAS',
-                'descripcion': 'Punto de Venta',
-                'emoji': '💰',
-                'color_bg': '#4834d4',
-                'color_hover': '#3742fa',
-                'color_text': '#ffffff',
+                **ModuloConfig.VENTAS,
+                'color_text': Colores.TEXT_WHITE,
                 'subtitle': 'Procesamiento rápido',
                 'comando': self.abrir_ventas
             },
             {
-                'nombre': 'CUENTAS',
-                'descripcion': 'Cuentas Corrientes',
-                'emoji': '💳',
-                'color_bg': '#ff9ff3',
-                'color_hover': '#f368e0',
-                'color_text': '#ffffff',
+                **ModuloConfig.CUENTAS,
+                'color_text': Colores.TEXT_WHITE,
                 'subtitle': 'Control de créditos',
                 'comando': self.abrir_cuentas
             },
             {
-                'nombre': 'REPORTES',
-                'descripcion': 'Analytics & BI',
-                'emoji': '📊',
-                'color_bg': '#feca57',
-                'color_hover': '#ff9f43',
-                'color_text': '#ffffff',
+                **ModuloConfig.REPORTES,
+                'color_text': Colores.TEXT_WHITE,
                 'subtitle': 'Inteligencia de negocio',
                 'comando': self.abrir_reportes
             },
             {
                 'nombre': 'CONFIGURACIÓN',
                 'descripcion': 'Ajustes del Sistema',
-                'emoji': '⚙️',
-                'color_bg': '#5f27cd',
-                'color_hover': '#341f97',
-                'color_text': '#ffffff',
+                'emoji': Iconos.CONFIGURACION,
+                'color': '#5f27cd',
+                'hover': '#341f97',
+                'color_text': Colores.TEXT_WHITE,
                 'subtitle': 'Personalización avanzada',
                 'comando': self.abrir_configuracion
             }
@@ -236,148 +181,127 @@ class VentanaPrincipal:
             self.crear_tarjeta_moderna(cards_container, modulo, row, col)
 
     def crear_tarjeta_moderna(self, parent, modulo, row, col):
-        """Crear tarjeta simple con bordes redondeados sin efectos hover"""
-        # Container principal de la tarjeta
-        card_container = tk.Frame(parent, bg='#1a1a2e')
-        card_container.grid(row=row, column=col, padx=25, pady=20, sticky='nsew')
+        """Crear tarjeta moderna con CustomTkinter y bordes redondeados"""
+        # Obtener colores (compatibilidad con ambas nomenclaturas)
+        color_fondo = modulo.get('color', modulo.get('color_bg', Colores.PRIMARY_START))
+        color_hover = modulo.get('hover', modulo.get('color_hover', Colores.PRIMARY_DARK))
 
-        # Sombra sutil para profundidad
-        shadow_frame = tk.Frame(card_container, bg='#0d0d1a', relief='flat')
-        shadow_frame.pack(fill='both', expand=True, padx=4, pady=4)
+        # Botón como tarjeta con CustomTkinter
+        card_btn = ctk.CTkButton(
+            parent,
+            text="",  # Sin texto, lo agregaremos como widgets hijos
+            fg_color=color_fondo,
+            hover_color=color_hover,
+            corner_radius=Dimensiones.RADIUS_LARGE,
+            border_width=0,
+            command=modulo['comando'],
+            cursor="hand2",
+            height=200
+        )
+        card_btn.grid(row=row, column=col, padx=Espaciado.NORMAL, pady=Espaciado.NORMAL, sticky='nsew')
 
-        # Frame principal de la tarjeta
-        card_frame = tk.Frame(shadow_frame, bg=modulo['color_bg'], relief='flat', bd=0)
-        card_frame.pack(fill='both', expand=True, padx=3, pady=3)
+        # Frame interno para contenido (sobre el botón)
+        content_frame = ctk.CTkFrame(card_btn, fg_color="transparent")
+        content_frame.place(relx=0.5, rely=0.5, anchor='center')
 
-        # Esquinas redondeadas simples
-        # Esquina superior izquierda
-        top_left = tk.Frame(card_frame, bg='#1a1a2e', width=8, height=8)
-        top_left.place(x=0, y=0)
+        # Icono emoji
+        icon_label = ctk.CTkLabel(
+            content_frame,
+            text=modulo['emoji'],
+            font=(Fuentes.FAMILIA_PRINCIPAL, 50),
+            text_color=Colores.TEXT_WHITE
+        )
+        icon_label.pack(pady=(5, 10))
 
-        # Esquina superior derecha
-        top_right = tk.Frame(card_frame, bg='#1a1a2e', width=8, height=8)
-        top_right.place(relx=1.0, x=-8, y=0)
-
-        # Esquina inferior izquierda
-        bottom_left = tk.Frame(card_frame, bg='#1a1a2e', width=8, height=8)
-        bottom_left.place(x=0, rely=1.0, y=-8)
-
-        # Esquina inferior derecha
-        bottom_right = tk.Frame(card_frame, bg='#1a1a2e', width=8, height=8)
-        bottom_right.place(relx=1.0, x=-8, rely=1.0, y=-8)
-
-        # Frame interno para contenido
-        content_frame = tk.Frame(card_frame, bg=modulo['color_bg'])
-        content_frame.pack(fill='both', expand=True, padx=25, pady=25)
-
-        # Icono emoji grande y centrado
-        icon_label = tk.Label(content_frame, text=modulo['emoji'],
-                             font=("Segoe UI", 45), bg=modulo['color_bg'], fg='white')
-        icon_label.pack(pady=(15, 10))
-
-        # Título principal
-        title_label = tk.Label(content_frame, text=modulo['nombre'],
-                              font=("Segoe UI", 16, "bold"),
-                              fg='#ffffff', bg=modulo['color_bg'])
+        # Título
+        title_label = ctk.CTkLabel(
+            content_frame,
+            text=modulo['nombre'],
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.GRANDE, Fuentes.BOLD),
+            text_color=Colores.TEXT_WHITE
+        )
         title_label.pack()
 
         # Descripción
-        desc_label = tk.Label(content_frame, text=modulo['descripcion'],
-                             font=("Segoe UI", 11),
-                             fg='#f0f0f0', bg=modulo['color_bg'])
+        desc_label = ctk.CTkLabel(
+            content_frame,
+            text=modulo['descripcion'],
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.NORMAL),
+            text_color="#f0f0f0"
+        )
         desc_label.pack(pady=(3, 0))
 
         # Subtítulo
-        subtitle_label = tk.Label(content_frame, text=modulo['subtitle'],
-                                 font=("Segoe UI", 9, "italic"),
-                                 fg='#e0e0e0', bg=modulo['color_bg'])
-        subtitle_label.pack(pady=(5, 15))
-
-        # Solo configurar eventos de clic (SIN hover)
-        widgets_clickeables = [
-            shadow_frame, card_frame, content_frame,
-            top_left, top_right, bottom_left, bottom_right,
-            icon_label, title_label, desc_label, subtitle_label
-        ]
-
-        # Hacer toda la tarjeta clickeable sin efectos hover
-        for widget in widgets_clickeables:
-            widget.bind("<Button-1>", lambda e, cmd=modulo['comando']: cmd())
-            widget.configure(cursor="hand2")
+        subtitle_label = ctk.CTkLabel(
+            content_frame,
+            text=modulo['subtitle'],
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.MUY_PEQUENO, Fuentes.ITALIC),
+            text_color="#e0e0e0"
+        )
+        subtitle_label.pack(pady=(5, 5))
 
 
     def crear_footer_estadisticas(self):
-        """Crear footer moderno con estadísticas en tiempo real"""
-        # Frame principal del footer
-        footer_frame = tk.Frame(self.root, bg='#0f3460', height=90)
+        """Crear footer moderno con CustomTkinter"""
+        # Footer con gradiente
+        footer_frame = ctk.CTkFrame(
+            self.root,
+            fg_color=(Colores.GRIS_OSCURO, "#34495e"),
+            height=Dimensiones.FOOTER_HEIGHT,
+            corner_radius=0
+        )
         footer_frame.pack(fill='x', side='bottom')
         footer_frame.pack_propagate(False)
 
-        # Container interno con gradiente simulado
-        footer_content = tk.Frame(footer_frame, bg='#0f3460')
-        footer_content.pack(fill='both', expand=True, padx=30, pady=15)
+        # Container interno
+        content_frame = ctk.CTkFrame(footer_frame, fg_color="transparent")
+        content_frame.pack(fill='both', expand=True, padx=Espaciado.XXL, pady=Espaciado.NORMAL)
 
-        # Panel izquierdo - Estado del sistema
-        left_panel = tk.Frame(footer_content, bg='#0f3460')
-        left_panel.pack(side='left', fill='y')
+        # Panel izquierdo - Estado
+        left_panel = ctk.CTkFrame(content_frame, fg_color="transparent")
+        left_panel.pack(side='left')
 
-        status_container = tk.Frame(left_panel, bg='#0f3460')
-        status_container.pack(anchor='w')
+        status_label = ctk.CTkLabel(left_panel, text="🚀 Sistema Activo",
+                                    font=("Segoe UI", 13, "bold"), text_color="#2ecc71")
+        status_label.pack()
 
-        status_icon = tk.Label(status_container, text="🚀",
-                              font=("Segoe UI", 16), bg='#0f3460')
-        status_icon.pack(side='left')
-
-        status_text = tk.Label(status_container, text="SISTEMA ACTIVO",
-                              font=("Segoe UI", 11, "bold"),
-                              fg='#4ecdc4', bg='#0f3460')
-        status_text.pack(side='left', padx=(10, 0))
-
-        # Panel central - Estadísticas dinámicas
-        center_panel = tk.Frame(footer_content, bg='#0f3460')
-        center_panel.pack(side='left', expand=True, fill='both', padx=50)
+        # Panel central - Estadísticas
+        center_panel = ctk.CTkFrame(content_frame, fg_color="transparent")
+        center_panel.pack(side='left', expand=True, padx=50)
 
         self.crear_mini_estadisticas(center_panel)
 
-        # Panel derecho - Información del sistema
-        right_panel = tk.Frame(footer_content, bg='#0f3460')
-        right_panel.pack(side='right', fill='y')
+        # Panel derecho
+        right_panel = ctk.CTkFrame(content_frame, fg_color="transparent")
+        right_panel.pack(side='right')
 
-        # Version badge
-        version_frame = tk.Frame(right_panel, bg='#ff6b6b', relief='flat')
-        version_frame.pack(side='left', padx=(0, 15))
+        # Versión
+        version_label = ctk.CTkLabel(right_panel, text="v3.0 PRO",
+                                     font=("Segoe UI", 11, "bold"),
+                                     text_color="white",
+                                     fg_color="#e74c3c",
+                                     corner_radius=8)
+        version_label.pack(side='left', padx=(0, 15), ipadx=10, ipady=5)
 
-        version_label = tk.Label(version_frame, text="v3.0 PRO",
-                                font=("Segoe UI", 9, "bold"),
-                                fg='white', bg='#ff6b6b')
-        version_label.pack(padx=8, pady=4)
-
-        # Botón de ayuda moderno
-        help_btn = tk.Button(right_panel, text="💡 Ayuda",
-                            font=("Segoe UI", 10, "bold"),
-                            fg='#4ecdc4', bg='#0f3460',
-                            relief='flat', bd=0, cursor='hand2',
-                            command=self.abrir_ayuda)
+        # Botón ayuda
+        help_btn = ctk.CTkButton(right_panel, text="💡 Ayuda",
+                                font=("Segoe UI", 11, "bold"),
+                                fg_color="#3498db",
+                                hover_color="#2980b9",
+                                width=100, height=35,
+                                corner_radius=8,
+                                command=self.abrir_ayuda)
         help_btn.pack(side='left')
 
-        # Efecto hover para el botón
-        def on_help_enter(e):
-            help_btn.configure(fg='#ff6b6b')
-        def on_help_leave(e):
-            help_btn.configure(fg='#4ecdc4')
-
-        help_btn.bind("<Enter>", on_help_enter)
-        help_btn.bind("<Leave>", on_help_leave)
-
     def crear_mini_estadisticas(self, parent):
-        """Crear mini estadísticas en el footer"""
-        stats_frame = tk.Frame(parent, bg='#0f3460')
+        """Crear mini estadísticas con CustomTkinter"""
+        stats_frame = ctk.CTkFrame(parent, fg_color="transparent")
         stats_frame.pack(expand=True)
 
         try:
             stats = self.producto_controller.obtener_estadisticas_productos()
 
-            # Crear badges de estadísticas
+            # Crear badges modernos
             self.crear_stat_badge(stats_frame, "📦", str(stats['total_productos']), "Productos", 0)
             self.crear_stat_badge(stats_frame, "💵", f"${stats['valor_inventario']:,.0f}", "Inventario", 1)
 
@@ -387,37 +311,38 @@ class VentanaPrincipal:
                 self.crear_stat_badge(stats_frame, "✅", "0", "Stock OK", 2)
 
         except Exception as e:
-            # Estadísticas por defecto en caso de error
-            error_label = tk.Label(stats_frame, text="📊 Estadísticas no disponibles",
-                                  font=("Segoe UI", 10), fg='#a8dadc', bg='#0f3460')
+            # Estadísticas por defecto
+            error_label = ctk.CTkLabel(stats_frame, text="📊 Estadísticas no disponibles",
+                                      font=("Segoe UI", 11), text_color="#95a5a6")
             error_label.pack()
 
     def crear_stat_badge(self, parent, icon, value, label, position, alert=False):
-        """Crear badge individual de estadística con mejor visibilidad"""
-        color = '#ff6b6b' if alert else '#4ecdc4'
+        """Crear badge moderno con CustomTkinter"""
+        color = '#e74c3c' if alert else '#3498db'
 
-        # Container con fondo ligeramente más claro para mejor contraste
-        badge_container = tk.Frame(parent, bg='#1a2a5e', relief='flat', bd=1)
-        badge_container.pack(side='left', padx=12, pady=5)
+        # Badge container
+        badge = ctk.CTkFrame(parent, fg_color=color, corner_radius=10)
+        badge.pack(side='left', padx=10)
 
-        badge_frame = tk.Frame(badge_container, bg='#1a2a5e')
-        badge_frame.pack(padx=12, pady=8)
+        # Contenido del badge
+        content = ctk.CTkFrame(badge, fg_color="transparent")
+        content.pack(padx=15, pady=10)
 
-        # Icono más grande
-        icon_label = tk.Label(badge_frame, text=icon,
-                             font=("Segoe UI", 16), bg='#1a2a5e')
+        # Icono
+        icon_label = ctk.CTkLabel(content, text=icon,
+                                  font=("Segoe UI", 18))
         icon_label.pack()
 
-        # Valor con mejor contraste
-        value_label = tk.Label(badge_frame, text=value,
-                              font=("Segoe UI", 13, "bold"),
-                              fg=color, bg='#1a2a5e')
+        # Valor
+        value_label = ctk.CTkLabel(content, text=value,
+                                   font=("Segoe UI", 14, "bold"),
+                                   text_color="white")
         value_label.pack(pady=(2, 0))
 
-        # Etiqueta con texto más grande y mejor contraste
-        label_label = tk.Label(badge_frame, text=label,
-                              font=("Segoe UI", 10, "bold"),
-                              fg='#ffffff', bg='#1a2a5e')
+        # Etiqueta
+        label_label = ctk.CTkLabel(content, text=label,
+                                   font=("Segoe UI", 10),
+                                   text_color="#f0f0f0")
         label_label.pack()
     
     def abrir_productos(self):

@@ -54,7 +54,15 @@ class ProductoController:
         except Exception as e:
             messagebox.showerror("Error", f"Error al obtener productos: {str(e)}")
             return []
-    
+
+    def obtener_producto_por_id(self, producto_id):
+        """Obtener un producto por su ID"""
+        try:
+            return Producto.buscar_por_id(producto_id)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al obtener producto: {str(e)}")
+            return None
+
     def actualizar_producto(self, producto_id, datos):
         """Actualizar un producto existente"""
         try:
@@ -221,3 +229,31 @@ class ProductoController:
                 'productos_bajo_stock': 0,
                 'ganancia_potencial': 0
             }
+
+    def generar_skus_faltantes(self):
+        """Generar SKUs para productos existentes que no los tengan"""
+        try:
+            from models.producto import Producto
+            productos = Producto.obtener_todos()
+            productos_actualizados = 0
+
+            for producto in productos:
+                if not producto.sku:  # Si no tiene SKU
+                    # Generar SKU para el producto
+                    producto.sku = producto.generar_sku_unico()
+
+                    # Actualizar en la base de datos
+                    if producto.actualizar():
+                        productos_actualizados += 1
+                        print(f"DEBUG: SKU generado para '{producto.nombre}': {producto.sku}")
+
+            if productos_actualizados > 0:
+                messagebox.showinfo("Éxito", f"Se generaron SKUs para {productos_actualizados} productos")
+            else:
+                messagebox.showinfo("Información", "Todos los productos ya tienen SKU asignado")
+
+            return productos_actualizados
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al generar SKUs: {str(e)}")
+            return 0

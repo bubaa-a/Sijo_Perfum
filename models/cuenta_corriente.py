@@ -189,3 +189,57 @@ class CuentaCorriente:
             db.ejecutar_consulta(query_create, (cliente_id,))
             return True
         return False
+
+    def revertir_cargo_venta(self, monto_venta, venta_id):
+        """Revertir el cargo de una venta eliminada"""
+        try:
+            # Revertir saldos en cuenta corriente
+            query_update = '''
+                UPDATE cuentas_corrientes
+                SET saldo_total = saldo_total - ?,
+                    saldo_pendiente = saldo_pendiente - ?,
+                    fecha_ultima_actualizacion = CURRENT_TIMESTAMP
+                WHERE cliente_id = ?
+            '''
+            self.db.ejecutar_consulta(query_update, (monto_venta, monto_venta, self.cliente_id))
+
+            # Eliminar movimiento asociado a la venta
+            query_delete_mov = '''
+                DELETE FROM movimientos_cuenta
+                WHERE cliente_id = ? AND venta_id = ?
+            '''
+            self.db.ejecutar_consulta(query_delete_mov, (self.cliente_id, venta_id))
+
+            return True
+
+        except Exception as e:
+            print(f"Error al revertir cargo de venta: {str(e)}")
+            return False
+
+    def eliminar_cuenta_vacia(self):
+        """Eliminar cuenta corriente si tiene saldo cero"""
+        try:
+            # Verificar que realmente tenga saldo cero
+            cuenta_info = self.obtener_cuenta()
+            if cuenta_info and cuenta_info['saldo_pendiente'] == 0 and cuenta_info['saldo_total'] == 0:
+
+                # Eliminar movimientos históricos
+                query_movimientos = "DELETE FROM movimientos_cuenta WHERE cliente_id = ?"
+                self.db.ejecutar_consulta(query_movimientos, (self.cliente_id,))
+
+                # Eliminar abonos históricos
+                query_abonos = "DELETE FROM abonos WHERE cliente_id = ?"
+                self.db.ejecutar_consulta(query_abonos, (self.cliente_id,))
+
+                # Eliminar cuenta corriente
+                query_cuenta = "DELETE FROM cuentas_corrientes WHERE cliente_id = ?"
+                self.db.ejecutar_consulta(query_cuenta, (self.cliente_id,))
+
+                print(f"DEBUG: Cuenta corriente del cliente {self.cliente_id} eliminada completamente")
+                return True
+
+            return False
+
+        except Exception as e:
+            print(f"Error al eliminar cuenta vacía: {str(e)}")
+            return False

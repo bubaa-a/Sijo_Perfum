@@ -1,9 +1,13 @@
 """
-Ventana para gestión de productos - Diseño moderno y funcional
+Ventana para gestión de productos - Diseño Moderno Mejorado con CustomTkinter
+Versión con estilos unificados
 """
 import tkinter as tk
 from tkinter import ttk, messagebox
+import customtkinter as ctk
 from controllers.producto_controller import ProductoController
+from config.estilos import (Colores, Fuentes, Espaciado, Dimensiones,
+                            Iconos, obtener_color_hover, estilo_entry, estilo_card)
 
 class VentanaProductos:
     def __init__(self, parent):
@@ -11,92 +15,142 @@ class VentanaProductos:
         self.controller = ProductoController()
         self.ventana = None
         self.tree = None
+        self.style = ttk.Style()
         self.crear_ventana()
 
     def crear_ventana(self):
-        """Crear la ventana de productos con diseño moderno"""
-        self.ventana = tk.Toplevel(self.parent)
-        self.ventana.title("Gestión de Productos - Sistema Empresarial Pro")
-        self.ventana.geometry("1400x800")
-        self.ventana.configure(bg='#f8f9fa')
+        """Crear ventana con diseño moderno CustomTkinter"""
+        # Configurar CustomTkinter
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("blue")
 
-        # Hacer que la ventana sea modal
+        self.ventana = tk.Toplevel(self.parent)
+        self.ventana.title("Gestión de Productos - Sistema Pro")
+        self.ventana.geometry("1500x900")
+        self.ventana.configure(bg=Colores.BG_PRIMARY)
+        self.ventana.resizable(True, True)
+
+        # Modal
         self.ventana.transient(self.parent)
         self.ventana.grab_set()
 
-        # Configurar el grid principal
+        # Grid principal
         self.ventana.grid_rowconfigure(1, weight=1)
         self.ventana.grid_columnconfigure(0, weight=1)
 
-        # Crear interfaz
-        self.crear_header_moderno()
-        self.crear_contenido_principal()
-
-        # Cargar productos
+        # Crear interfaz moderna
+        self.crear_header_web()
+        self.crear_contenido_web()
         self.cargar_productos()
 
-    def crear_header_moderno(self):
-        """Crear header atractivo con búsqueda"""
-        # Header principal
-        header_frame = tk.Frame(self.ventana, bg='#2c3e50', height=100)
-        header_frame.grid(row=0, column=0, sticky='ew')
-        header_frame.grid_propagate(False)
-        header_frame.grid_columnconfigure(1, weight=1)
+    def crear_header_web(self):
+        """Header estilo web moderno con CustomTkinter"""
+        # Header principal con gradiente
+        header = ctk.CTkFrame(
+            self.ventana,
+            fg_color=(Colores.PRIMARY_START, Colores.PRIMARY_END),
+            height=Dimensiones.FOOTER_HEIGHT,
+            corner_radius=0
+        )
+        header.grid(row=0, column=0, sticky='ew')
+        header.grid_propagate(False)
+        header.grid_columnconfigure(1, weight=1)
 
-        # Icono y título
-        title_frame = tk.Frame(header_frame, bg='#2c3e50')
-        title_frame.grid(row=0, column=0, sticky='w', padx=30, pady=20)
+        # Título con icono
+        title_label = ctk.CTkLabel(
+            header,
+            text=f"{Iconos.PRODUCTOS} INVENTARIO",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.LARGE, Fuentes.BOLD),
+            text_color=Colores.TEXT_WHITE
+        )
+        title_label.grid(row=0, column=0, sticky='w', padx=Espaciado.LARGE, pady=Espaciado.NORMAL)
 
-        # Título principal
-        tk.Label(title_frame, text="PRODUCTOS",
-                font=("Segoe UI", 24, "bold"), fg='#ecf0f1', bg='#2c3e50').pack()
+        # Container para barra de búsqueda con icono
+        search_container = ctk.CTkFrame(
+            header,
+            fg_color=Colores.BG_SECONDARY,
+            corner_radius=Dimensiones.RADIUS_SMALL,
+            height=Dimensiones.ENTRY_HEIGHT
+        )
+        search_container.grid(row=0, column=1, sticky='e', padx=Espaciado.LARGE, pady=Espaciado.NORMAL)
 
-        # Subtítulo
-        tk.Label(title_frame, text="Gestión completa de inventario",
-                font=("Segoe UI", 12), fg='#bdc3c7', bg='#2c3e50').pack()
+        # Icono de búsqueda
+        search_icon = ctk.CTkLabel(
+            search_container,
+            text=Iconos.BUSCAR,
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.MEDIANO),
+            text_color=Colores.TEXT_SECONDARY,
+            fg_color="transparent"
+        )
+        search_icon.pack(side='left', padx=(Espaciado.PEQUENO, 0))
 
-        # Panel de búsqueda
-        search_frame = tk.Frame(header_frame, bg='#34495e')
-        search_frame.grid(row=0, column=1, sticky='e', padx=30, pady=20)
-
-        tk.Label(search_frame, text="Buscar Producto:",
-                font=("Segoe UI", 11, "bold"), fg='#ecf0f1', bg='#34495e').pack()
-
-        # Entry de búsqueda con estilo
+        # Barra de búsqueda moderna con CTkEntry
         self.buscar_var = tk.StringVar()
         self.buscar_var.trace('w', self.buscar_productos)
 
-        search_entry = tk.Entry(search_frame, textvariable=self.buscar_var,
-                               font=("Segoe UI", 12), width=30, relief='flat',
-                               bg='white', fg='#2c3e50', insertbackground='#2c3e50')
-        search_entry.pack(pady=(5, 0), ipady=8)
+        search_entry = ctk.CTkEntry(
+            search_container,
+            textvariable=self.buscar_var,
+            placeholder_text="Buscar productos...",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO),
+            width=240,
+            height=Dimensiones.ENTRY_HEIGHT,
+            corner_radius=0,
+            border_width=0,
+            fg_color=Colores.BG_SECONDARY,
+            text_color=Colores.TEXT_PRIMARY
+        )
+        search_entry.pack(side='left', padx=(0, Espaciado.PEQUENO))
 
-
-    def crear_contenido_principal(self):
-        """Crear el contenido principal con formulario y lista"""
-        # Contenedor principal
-        main_container = tk.Frame(self.ventana, bg='#f8f9fa')
-        main_container.grid(row=1, column=0, sticky='nsew', padx=20, pady=20)
+    def crear_contenido_web(self):
+        """Contenido principal estilo web con CustomTkinter"""
+        # Container principal
+        main_container = ctk.CTkFrame(self.ventana, fg_color=Colores.BG_PRIMARY, corner_radius=0)
+        main_container.grid(row=1, column=0, sticky='nsew', padx=Espaciado.MEDIO, pady=Espaciado.MEDIO)
         main_container.grid_rowconfigure(1, weight=1)
-        main_container.grid_columnconfigure(0, weight=1)
+        main_container.grid_columnconfigure(1, weight=1)
 
-        # Crear formulario
-        self.crear_formulario_moderno(main_container)
+        # Panel izquierdo - Formulario
+        self.crear_panel_formulario(main_container)
 
-        # Crear lista de productos
-        self.crear_lista_moderna(main_container)
+        # Panel derecho - Lista de productos
+        self.crear_panel_lista(main_container)
 
-        # Crear botones
-        self.crear_botones_modernos(main_container)
+    def crear_panel_formulario(self, parent):
+        """Panel de formulario estilo card web con CustomTkinter"""
+        # Card container
+        form_card = ctk.CTkFrame(
+            parent,
+            **estilo_card()
+        )
+        form_card.grid(row=0, column=0, rowspan=2, sticky='nsew', padx=(0, Espaciado.NORMAL))
+        form_card.grid_rowconfigure(1, weight=1)
+        form_card.grid_columnconfigure(0, weight=1)
 
-    def crear_formulario_moderno(self, parent):
-        """Crear formulario atractivo"""
-        # Frame del formulario
-        form_frame = tk.LabelFrame(parent, text="  Información del Producto  ",
-                                  font=("Segoe UI", 14, "bold"), fg='#2c3e50',
-                                  bg='white', relief='raised', bd=2)
-        form_frame.grid(row=0, column=0, sticky='ew', pady=(0, 15))
-        form_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
+        # Header del card
+        card_header = ctk.CTkFrame(
+            form_card,
+            fg_color=Colores.PRIMARY_START,
+            height=50,
+            corner_radius=Dimensiones.RADIUS_NORMAL
+        )
+        card_header.grid(row=0, column=0, sticky='ew', padx=2, pady=2)
+        card_header.grid_propagate(False)
+
+        ctk.CTkLabel(
+            card_header,
+            text=f"{Iconos.EDITAR} Información del Producto",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.MEDIANO, Fuentes.BOLD),
+            text_color=Colores.TEXT_WHITE
+        ).pack(pady=12)
+
+        # Frame scrollable para el contenido del formulario
+        scroll_container = ctk.CTkScrollableFrame(
+            form_card,
+            fg_color=Colores.BG_CARD,
+            corner_radius=0
+        )
+        scroll_container.grid(row=1, column=0, sticky='nsew', padx=Espaciado.MEDIO, pady=(Espaciado.PEQUENO, Espaciado.PEQUENO))
 
         # Variables del formulario
         self.nombre_var = tk.StringVar()
@@ -110,135 +164,155 @@ class VentanaProductos:
         self.tipo_var = tk.StringVar()
         self.proveedor_var = tk.StringVar()
 
-        # Estilo para labels y entries
-        label_style = {'font': ('Segoe UI', 10, 'bold'), 'fg': '#34495e', 'bg': 'white'}
-        entry_style = {'font': ('Segoe UI', 11), 'relief': 'solid', 'bd': 1, 'bg': '#f8f9fa'}
+        # Crear campos del formulario en el frame scrollable
+        self.crear_campos_formulario(scroll_container)
 
-        # Primera fila
-        tk.Label(form_frame, text="Nombre del Producto:", **label_style).grid(
-            row=0, column=0, sticky='w', padx=15, pady=(15, 5))
-        tk.Entry(form_frame, textvariable=self.nombre_var, width=25, **entry_style).grid(
-            row=1, column=0, sticky='ew', padx=15, pady=(0, 15))
+        # Botones de acción (fuera del scroll, fijos en la parte inferior)
+        self.crear_botones_accion(form_card)
 
-        tk.Label(form_frame, text="Categoría:", **label_style).grid(
-            row=0, column=1, sticky='w', padx=15, pady=(15, 5))
-        categoria_combo = ttk.Combobox(form_frame, textvariable=self.categoria_var, width=22,
-                                      font=('Segoe UI', 11))
-        categoria_combo['values'] = ('Electrónicos', 'Ropa', 'Hogar', 'Deportes', 'Libros', 'Otros')
-        categoria_combo.grid(row=1, column=1, sticky='ew', padx=15, pady=(0, 15))
-
-        tk.Label(form_frame, text="Stock Actual:", **label_style).grid(
-            row=0, column=2, sticky='w', padx=15, pady=(15, 5))
-        tk.Entry(form_frame, textvariable=self.stock_var, width=15, **entry_style).grid(
-            row=1, column=2, sticky='ew', padx=15, pady=(0, 15))
-
-        tk.Label(form_frame, text="Stock Mínimo:", **label_style).grid(
-            row=0, column=3, sticky='w', padx=15, pady=(15, 5))
-        tk.Entry(form_frame, textvariable=self.stock_minimo_var, width=15, **entry_style).grid(
-            row=1, column=3, sticky='ew', padx=15, pady=(0, 15))
-
-        # Segunda fila
-        tk.Label(form_frame, text="Precio de Compra:", **label_style).grid(
-            row=2, column=0, sticky='w', padx=15, pady=(0, 5))
-        tk.Entry(form_frame, textvariable=self.precio_compra_var, width=25, **entry_style).grid(
-            row=3, column=0, sticky='ew', padx=15, pady=(0, 15))
-
-        tk.Label(form_frame, text="Precio de Venta:", **label_style).grid(
-            row=2, column=1, sticky='w', padx=15, pady=(0, 5))
-        tk.Entry(form_frame, textvariable=self.precio_venta_var, width=22, **entry_style).grid(
-            row=3, column=1, sticky='ew', padx=15, pady=(0, 15))
-
-        tk.Label(form_frame, text="Descripción:", **label_style).grid(
-            row=2, column=2, columnspan=2, sticky='w', padx=15, pady=(0, 5))
-        tk.Entry(form_frame, textvariable=self.descripcion_var, width=40, **entry_style).grid(
-            row=3, column=2, columnspan=2, sticky='ew', padx=15, pady=(0, 15))
-
-        # Tercera fila - Nuevos campos
-        tk.Label(form_frame, text="Marca:", **label_style).grid(
-            row=4, column=0, sticky='w', padx=15, pady=(0, 5))
-        tk.Entry(form_frame, textvariable=self.marca_var, width=25, **entry_style).grid(
-            row=5, column=0, sticky='ew', padx=15, pady=(0, 15))
-
-        tk.Label(form_frame, text="Tipo:", **label_style).grid(
-            row=4, column=1, sticky='w', padx=15, pady=(0, 5))
-        tk.Entry(form_frame, textvariable=self.tipo_var, width=22, **entry_style).grid(
-            row=5, column=1, sticky='ew', padx=15, pady=(0, 15))
-
-        tk.Label(form_frame, text="Proveedor:", **label_style).grid(
-            row=4, column=2, columnspan=2, sticky='w', padx=15, pady=(0, 5))
-        tk.Entry(form_frame, textvariable=self.proveedor_var, width=40, **entry_style).grid(
-            row=5, column=2, columnspan=2, sticky='ew', padx=15, pady=(0, 15))
-
-        # Variables para modo edición
+        # Variables para edición
         self.modo_edicion = False
         self.producto_editando_id = None
 
-    def crear_lista_moderna(self, parent):
-        """Crear lista atractiva de productos"""
-        # Frame de la lista
-        list_frame = tk.LabelFrame(parent, text="  Inventario de Productos  ",
-                                  font=("Segoe UI", 14, "bold"), fg='#2c3e50',
-                                  bg='white', relief='raised', bd=2)
-        list_frame.grid(row=1, column=0, sticky='nsew', pady=(0, 15))
-        list_frame.grid_rowconfigure(1, weight=1)
-        list_frame.grid_columnconfigure(0, weight=1)
+    def crear_campos_formulario(self, parent):
+        """Crear campos de formulario con CustomTkinter"""
+        row = 0
 
-        # Info header
-        info_frame = tk.Frame(list_frame, bg='white')
-        info_frame.grid(row=0, column=0, sticky='ew', padx=15, pady=10)
+        # Función para crear campo
+        def crear_campo(label_text, var, width=160):
+            nonlocal row
 
-        tk.Label(info_frame, text="Haga doble clic en un producto para editarlo",
-                font=("Segoe UI", 10, "italic"), fg='#7f8c8d', bg='white').pack(side='left')
+            # Label
+            ctk.CTkLabel(
+                parent,
+                text=label_text,
+                font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.MUY_PEQUENO, Fuentes.BOLD),
+                text_color=Colores.PRIMARY_START
+            ).grid(row=row, column=0, sticky='w', pady=(Espaciado.PEQUENO if row > 0 else 0, Espaciado.MINI))
+
+            # Entry con CustomTkinter usando estilos
+            entry_config = estilo_entry()
+            entry = ctk.CTkEntry(
+                parent,
+                textvariable=var,
+                width=width,
+                **entry_config
+            )
+            entry.grid(row=row+1, column=0, sticky='w', pady=(0, Espaciado.MUY_PEQUENO))
+
+            row += 2
+            return entry
+
+        # Campos principales (ancho compacto)
+        crear_campo(f"{Iconos.DOCUMENTO} Nombre del Producto", self.nombre_var, 240)
+        crear_campo(f"{Iconos.ETIQUETA} Marca", self.marca_var, 180)
+        crear_campo("📂 Categoría", self.categoria_var, 180)
+        crear_campo("🔧 Tipo", self.tipo_var, 180)
+        crear_campo(f"{Iconos.DINERO} Precio de Compra", self.precio_compra_var, 140)
+        crear_campo(f"{Iconos.DINERO} Precio de Venta", self.precio_venta_var, 140)
+        crear_campo(f"{Iconos.PRODUCTOS} Stock Actual", self.stock_var, 120)
+        crear_campo(f"{Iconos.ADVERTENCIA} Stock Mínimo", self.stock_minimo_var, 120)
+        crear_campo("🏭 Proveedor", self.proveedor_var, 200)
+        crear_campo(f"{Iconos.DOCUMENTO} Descripción", self.descripcion_var, 260)
+
+    def crear_botones_accion(self, parent):
+        """Botones de acción con CustomTkinter"""
+        # Container de botones
+        btn_container = ctk.CTkFrame(parent, fg_color=Colores.BG_CARD, corner_radius=0)
+        btn_container.grid(row=2, column=0, sticky='ew', padx=Espaciado.MEDIO, pady=(Espaciado.PEQUENO, Espaciado.MEDIO))
+
+        # Función para crear botón CTk moderno
+        def crear_boton_ctk(texto, color, comando, icono=""):
+            btn = ctk.CTkButton(
+                btn_container,
+                text=f"{icono} {texto}",
+                font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO, Fuentes.BOLD),
+                fg_color=color,
+                hover_color=obtener_color_hover(color),
+                width=260,
+                height=Dimensiones.BUTTON_HEIGHT_SMALL,
+                corner_radius=Dimensiones.RADIUS_NORMAL,
+                border_width=0,
+                command=comando
+            )
+            btn.pack(fill='x', pady=Espaciado.MUY_PEQUENO)
+            return btn
+
+        # Botones principales
+        crear_boton_ctk("Guardar Producto", Colores.INFO, self.guardar_producto, Iconos.GUARDAR)
+        crear_boton_ctk("Actualizar Producto", Colores.WARNING, self.actualizar_producto, Iconos.EDITAR)
+        crear_boton_ctk("Eliminar Producto", Colores.DANGER, self.eliminar_producto, Iconos.ELIMINAR)
+        crear_boton_ctk("Limpiar Formulario", Colores.GRIS_MEDIO, self.limpiar_formulario, Iconos.LIMPIAR)
+        crear_boton_ctk("Generar SKUs", Colores.SUCCESS, self.generar_skus, Iconos.ETIQUETA)
+
+    def crear_panel_lista(self, parent):
+        """Panel de lista de productos con CustomTkinter"""
+        # Card de lista
+        list_card = ctk.CTkFrame(
+            parent,
+            **estilo_card()
+        )
+        list_card.grid(row=0, column=1, rowspan=2, sticky='nsew')
+        list_card.grid_rowconfigure(1, weight=1)
+        list_card.grid_columnconfigure(0, weight=1)
+
+        # Header de la lista
+        list_header = ctk.CTkFrame(
+            list_card,
+            fg_color=Colores.PRIMARY_START,
+            height=50,
+            corner_radius=Dimensiones.RADIUS_NORMAL
+        )
+        list_header.grid(row=0, column=0, sticky='ew', padx=2, pady=2)
+        list_header.grid_propagate(False)
+
+        ctk.CTkLabel(
+            list_header,
+            text=f"{Iconos.REPORTES} Inventario de Productos",
+            font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.MEDIANO, Fuentes.BOLD),
+            text_color=Colores.TEXT_WHITE
+        ).pack(pady=12)
+
+        # Divisor
+        ctk.CTkFrame(list_card, fg_color=Colores.BORDER_LIGHT, height=2).grid(
+            row=0, column=0, sticky='ew', padx=Espaciado.MEDIO, pady=(52, 0))
 
         # Container del treeview
-        tree_container = tk.Frame(list_frame, bg='white')
-        tree_container.grid(row=1, column=0, sticky='nsew', padx=15, pady=(0, 15))
+        tree_container = tk.Frame(list_card, bg=Colores.BG_CARD)
+        tree_container.grid(row=1, column=0, sticky='nsew', padx=Espaciado.MEDIO, pady=(Espaciado.PEQUENO, Espaciado.MEDIO))
         tree_container.grid_rowconfigure(0, weight=1)
         tree_container.grid_columnconfigure(0, weight=1)
 
-        # Configurar estilo moderno
-        style = ttk.Style()
-        style.configure("Modern.Treeview",
-                       background="#ffffff",
-                       foreground="#2c3e50",
-                       fieldbackground="#ffffff",
-                       font=("Segoe UI", 10),
-                       rowheight=35)
-        style.configure("Modern.Treeview.Heading",
-                       background="#34495e",
-                       foreground="white",
-                       font=("Segoe UI", 11, "bold"))
+        # Configurar estilo del treeview
+        self.configurar_estilo_treeview()
 
-        # Crear Treeview
-        columns = ('ID', 'Nombre', 'Marca', 'Tipo', 'Categoría', 'Proveedor', 'P.Compra', 'P.Venta', 'Stock', 'Mín', 'Estado')
+        # Crear treeview
+        columns = ('ID', 'SKU', 'Nombre', 'Marca', 'Tipo', 'Categoría', 'P.Compra', 'P.Venta', 'Stock', 'Mín', 'Estado')
         self.tree = ttk.Treeview(tree_container, columns=columns, show='headings',
-                                style="Modern.Treeview")
+                                style="WebModern.Treeview", height=20)
 
         # Configurar columnas
         headers = {
-            'ID': ('ID', 50),
-            'Nombre': ('Producto', 180),
-            'Marca': ('Marca', 100),
-            'Tipo': ('Tipo', 100),
-            'Categoría': ('Categoría', 100),
-            'Proveedor': ('Proveedor', 120),
-            'P.Compra': ('P. Compra', 90),
-            'P.Venta': ('P. Venta', 90),
-            'Stock': ('Stock', 70),
-            'Mín': ('Mín', 60),
-            'Estado': ('Estado', 90)
+            'ID': ('ID', 50), 'SKU': ('SKU', 80), 'Nombre': ('Producto', 180),
+            'Marca': ('Marca', 100), 'Tipo': ('Tipo', 90), 'Categoría': ('Categoría', 100),
+            'P.Compra': ('P. Compra', 90), 'P.Venta': ('P. Venta', 90),
+            'Stock': ('Stock', 70), 'Mín': ('Mín', 60), 'Estado': ('Estado', 100)
         }
 
-        for col, (text, width) in headers.items():
-            self.tree.heading(col, text=text)
-            self.tree.column(col, width=width, anchor='center' if col in ['Stock', 'Mín', 'ID'] else 'w')
+        for col, (header, width) in headers.items():
+            self.tree.heading(col, text=header)
+            if col in ['P.Compra', 'P.Venta', 'Stock', 'Mín']:
+                anchor = 'center'
+            else:
+                anchor = 'w'
+            self.tree.column(col, width=width, anchor=anchor, minwidth=50)
 
         # Scrollbars
         v_scrollbar = ttk.Scrollbar(tree_container, orient='vertical', command=self.tree.yview)
         h_scrollbar = ttk.Scrollbar(tree_container, orient='horizontal', command=self.tree.xview)
         self.tree.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
 
-        # Grid layout para scrollbars
+        # Grid layout
         self.tree.grid(row=0, column=0, sticky='nsew')
         v_scrollbar.grid(row=0, column=1, sticky='ns')
         h_scrollbar.grid(row=1, column=0, sticky='ew')
@@ -246,276 +320,277 @@ class VentanaProductos:
         # Eventos
         self.tree.bind('<Double-1>', self.seleccionar_producto)
 
-    def crear_botones_modernos(self, parent):
-        """Crear botones atractivos"""
-        # Frame de botones
-        buttons_frame = tk.Frame(parent, bg='#f8f9fa')
-        buttons_frame.grid(row=2, column=0, sticky='ew')
+    def configurar_estilo_treeview(self):
+        """Configurar estilo web del treeview"""
+        # Configurar tema base
+        self.style.theme_use('clam')
 
-        # Contenedor centrado
-        center_frame = tk.Frame(buttons_frame, bg='#f8f9fa')
-        center_frame.pack(expand=True)
+        # Configurar cuerpo del treeview
+        self.style.configure("WebModern.Treeview",
+                           background=Colores.BG_SECONDARY,
+                           foreground=Colores.TEXT_PRIMARY,
+                           fieldbackground=Colores.BG_SECONDARY,
+                           font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO),
+                           rowheight=38,
+                           borderwidth=0)
 
-        # Función para crear botones modernos
-        def crear_boton(texto, color, comando, icono=""):
-            btn = tk.Button(center_frame, text=f"{icono} {texto}",
-                           font=("Segoe UI", 11, "bold"), fg='white', bg=color,
-                           relief='flat', cursor='hand2', padx=20, pady=10,
-                           command=comando)
-            btn.pack(side='left', padx=8)
+        # Header con colores permanentes y fuertes
+        self.style.configure("WebModern.Treeview.Heading",
+                           background='#667eea',  # Morado similar al banner
+                           foreground='#FFFFFF',  # Blanco permanente
+                           font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.NORMAL, Fuentes.BOLD),
+                           relief="solid",
+                           borderwidth=1,
+                           lightcolor='#7c8cf5',
+                           darkcolor='#7c8cf5')
 
-            # Efectos hover
-            def on_enter(e):
-                btn.configure(relief='raised', bg=self.darken_color(color))
-            def on_leave(e):
-                btn.configure(relief='flat', bg=color)
+        # Deshabilitar TODOS los efectos de hover y click en headers
+        self.style.map("WebModern.Treeview.Heading",
+                      background=[('active', '#667eea'), ('pressed', '#667eea'), ('!active', '#667eea')],
+                      foreground=[('active', '#FFFFFF'), ('pressed', '#FFFFFF'), ('!active', '#FFFFFF')],
+                      relief=[('active', 'solid'), ('pressed', 'solid')])
 
-            btn.bind('<Enter>', on_enter)
-            btn.bind('<Leave>', on_leave)
-            return btn
-
-        # Botones principales
-        crear_boton("Nuevo", "#27ae60", self.nuevo_producto, "➕")
-        crear_boton("Guardar", "#3498db", self.guardar_producto, "💾")
-        crear_boton("Editar", "#f39c12", self.editar_producto, "✏️")
-        crear_boton("Eliminar", "#e74c3c", self.eliminar_producto, "🗑️")
-        crear_boton("Actualizar", "#9b59b6", self.cargar_productos, "🔄")
-        crear_boton("Cerrar", "#95a5a6", self.cerrar_ventana, "❌")
-
-    def darken_color(self, color):
-        """Oscurecer un color para efecto hover"""
-        color_map = {
-            "#27ae60": "#219a52",
-            "#3498db": "#2980b9",
-            "#f39c12": "#e67e22",
-            "#e74c3c": "#c0392b",
-            "#9b59b6": "#8e44ad",
-            "#95a5a6": "#7f8c8d"
-        }
-        return color_map.get(color, color)
-
-    def cargar_productos(self):
-        """Cargar productos en la lista"""
-        try:
-            # Limpiar lista
-            for item in self.tree.get_children():
-                self.tree.delete(item)
-
-            # Obtener productos
-            productos = self.controller.obtener_todos_productos()
-
-            # Agregar productos a la lista
-            for producto in productos:
-                ganancia = f"${producto.calcular_ganancia():.2f}"
-
-                # Cambiar color si stock bajo
-                tags = ('normal',)
-                if producto.necesita_restock():
-                    tags = ('bajo_stock',)
-                elif producto.stock <= 0:
-                    tags = ('agotado',)
-
-                # Determinar estado
-                if producto.stock <= 0:
-                    estado = "Agotado"
-                elif producto.necesita_restock():
-                    estado = "Stock Bajo"
-                else:
-                    estado = "Disponible"
-
-                self.tree.insert('', 'end', values=(
-                    producto.id,
-                    producto.nombre,
-                    producto.marca or '',
-                    producto.tipo or '',
-                    producto.categoria or '',
-                    producto.proveedor or '',
-                    f"${producto.precio_compra:.2f}",
-                    f"${producto.precio_venta:.2f}",
-                    producto.stock,
-                    producto.stock_minimo,
-                    estado
-                ), tags=tags)
-
-            # Configurar colores
-            self.tree.tag_configure('bajo_stock', background='#fff3cd')
-            self.tree.tag_configure('agotado', background='#f8d7da')
-            self.tree.tag_configure('normal', background='#d4edda')
-
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al cargar productos: {str(e)}")
+        # Colores de selección de filas
+        self.style.map("WebModern.Treeview",
+                      background=[('selected', Colores.PRIMARY_START)],
+                      foreground=[('selected', Colores.TEXT_WHITE)])
 
     def buscar_productos(self, *args):
         """Buscar productos"""
+        # Verificar que el treeview esté inicializado
+        if not self.tree:
+            return
+
         termino = self.buscar_var.get()
+        if termino == "Buscar productos...":
+            termino = ""
 
         # Limpiar lista
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        # Buscar productos
-        if termino.strip():
+        if not termino:
+            self.cargar_productos()
+            return
+
+        try:
             productos = self.controller.buscar_productos(termino)
-        else:
+            for producto in productos:
+                sku_display = getattr(producto, 'sku', 'SIN-SKU')
+
+                if producto.stock <= 0:
+                    estado = "Agotado"
+                    tags = ('agotado',)
+                elif producto.necesita_restock():
+                    estado = "Stock Bajo"
+                    tags = ('bajo_stock',)
+                else:
+                    estado = "Disponible"
+                    tags = ('normal',)
+
+                self.tree.insert('', 'end', values=(
+                    producto.id, sku_display, producto.nombre,
+                    producto.marca or '', producto.tipo or '', producto.categoria or '',
+                    f"${producto.precio_compra:.0f}", f"${producto.precio_venta:.0f}",
+                    producto.stock, producto.stock_minimo, estado
+                ), tags=tags)
+
+            self.configurar_colores_filas()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al buscar: {str(e)}")
+
+    def cargar_productos(self):
+        """Cargar productos en el treeview"""
+        # Verificar que el treeview esté inicializado
+        if not self.tree:
+            return
+
+        try:
+            # Limpiar lista actual
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+
             productos = self.controller.obtener_todos_productos()
 
-        # Mostrar resultados
-        for producto in productos:
-            ganancia = f"${producto.calcular_ganancia():.2f}"
+            for producto in productos:
+                sku_display = getattr(producto, 'sku', 'SIN-SKU')
 
-            tags = ('normal',)
-            if producto.necesita_restock():
-                tags = ('bajo_stock',)
-            elif producto.stock <= 0:
-                tags = ('agotado',)
+                if producto.stock <= 0:
+                    estado = "Agotado"
+                    tags = ('agotado',)
+                elif producto.necesita_restock():
+                    estado = "Stock Bajo"
+                    tags = ('bajo_stock',)
+                else:
+                    estado = "Disponible"
+                    tags = ('normal',)
 
-            # Determinar estado
-            if producto.stock <= 0:
-                estado = "❌ Agotado"
-            elif producto.necesita_restock():
-                estado = "⚠️ Stock Bajo"
-            else:
-                estado = "✅ Disponible"
+                self.tree.insert('', 'end', values=(
+                    producto.id, sku_display, producto.nombre,
+                    producto.marca or '', producto.tipo or '', producto.categoria or '',
+                    f"${producto.precio_compra:.0f}", f"${producto.precio_venta:.0f}",
+                    producto.stock, producto.stock_minimo, estado
+                ), tags=tags)
 
-            self.tree.insert('', 'end', values=(
-                producto.id,
-                producto.nombre,
-                producto.categoria,
-                f"${producto.precio_compra:.2f}",
-                f"${producto.precio_venta:.2f}",
-                producto.stock,
-                producto.stock_minimo,
-                ganancia,
-                estado
-            ), tags=tags)
+            self.configurar_colores_filas()
 
-        # Configurar colores
-        self.tree.tag_configure('bajo_stock', background='#fff3cd')
-        self.tree.tag_configure('agotado', background='#f8d7da')
-        self.tree.tag_configure('normal', background='#d4edda')
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al cargar productos: {str(e)}")
+
+    def configurar_colores_filas(self):
+        """Configurar colores de filas según estado - Más visibles y profesionales"""
+        # Colores más brillantes y visibles con mejor contraste
+        self.tree.tag_configure('bajo_stock',
+                               background='#FFF3CD',  # Amarillo suave
+                               foreground='#664D03',  # Marrón oscuro
+                               font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO))
+
+        self.tree.tag_configure('agotado',
+                               background='#F8D7DA',  # Rojo suave
+                               foreground='#842029',  # Rojo oscuro
+                               font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO))
+
+        self.tree.tag_configure('normal',
+                               background='#D1F2EB',  # Verde agua suave
+                               foreground='#0C5460',  # Azul oscuro
+                               font=(Fuentes.FAMILIA_PRINCIPAL, Fuentes.PEQUENO))
 
     def seleccionar_producto(self, event):
-        """Manejar selección de producto"""
-        seleccion = self.tree.selection()
-        if seleccion:
-            item = self.tree.item(seleccion[0])
-            valores = item['values']
+        """Seleccionar producto para edición"""
+        item = self.tree.selection()[0]
+        producto_id = self.tree.item(item, 'values')[0]
 
-            # Llenar formulario
-            self.nombre_var.set(valores[1])
-            self.categoria_var.set(valores[2])
-            self.precio_compra_var.set(valores[3].replace('$', ''))
-            self.precio_venta_var.set(valores[4].replace('$', ''))
-            self.stock_var.set(valores[5])
-            self.stock_minimo_var.set(valores[6])
-
-            # Obtener descripción del producto
-            from models.producto import Producto
-            producto = Producto.buscar_por_id(valores[0])
-            if producto:
-                self.descripcion_var.set(producto.descripcion or "")
-
-    def nuevo_producto(self):
-        """Preparar para nuevo producto"""
-        self.limpiar_formulario()
-        self.modo_edicion = False
-        self.producto_editando_id = None
-
-    def guardar_producto(self):
-        """Guardar producto"""
-        datos = {
-            'nombre': self.nombre_var.get(),
-            'categoria': self.categoria_var.get(),
-            'descripcion': self.descripcion_var.get(),
-            'precio_compra': self.precio_compra_var.get(),
-            'precio_venta': self.precio_venta_var.get(),
-            'stock': self.stock_var.get(),
-            'stock_minimo': self.stock_minimo_var.get(),
-            'marca': self.marca_var.get(),
-            'tipo': self.tipo_var.get(),
-            'proveedor': self.proveedor_var.get()
-        }
-
-        if self.modo_edicion and self.producto_editando_id:
-            # Actualizar producto existente
-            if self.controller.actualizar_producto(self.producto_editando_id, datos):
-                self.cargar_productos()
-                self.limpiar_formulario()
-                self.modo_edicion = False
-                self.producto_editando_id = None
-                messagebox.showinfo("Éxito", "Producto actualizado correctamente")
-        else:
-            # Crear nuevo producto
-            if self.controller.crear_producto(datos):
-                self.cargar_productos()
-                self.limpiar_formulario()
-                messagebox.showinfo("Éxito", f"Producto '{datos['nombre']}' creado correctamente")
-
-    def editar_producto(self):
-        """Preparar para editar producto"""
-        seleccion = self.tree.selection()
-        if not seleccion:
-            messagebox.showwarning("Advertencia", "Seleccione un producto para editar")
-            return
-
-        item = self.tree.item(seleccion[0])
-        valores = item['values']
-
-        # Obtener datos completos del producto desde la base de datos
         try:
-            from models.producto import Producto
-            producto = Producto.buscar_por_id(valores[0])
+            producto = self.controller.obtener_producto_por_id(int(producto_id))
             if producto:
-                # Cargar datos en el formulario
-                self.nombre_var.set(producto.nombre)
-                self.categoria_var.set(producto.categoria or '')
-                self.descripcion_var.set(producto.descripcion or '')
-                self.precio_compra_var.set(str(producto.precio_compra))
-                self.precio_venta_var.set(str(producto.precio_venta))
-                self.stock_var.set(str(producto.stock))
-                self.stock_minimo_var.set(str(producto.stock_minimo))
-                self.marca_var.set(producto.marca or '')
-                self.tipo_var.set(producto.tipo or '')
-                self.proveedor_var.set(producto.proveedor or '')
-
+                self.cargar_datos_formulario(producto)
                 self.modo_edicion = True
-                self.producto_editando_id = valores[0]
-                messagebox.showinfo("Modo Edición", f"Editando: {producto.nombre}\nModifique los datos y presione Guardar")
-            else:
-                messagebox.showerror("Error", "No se pudo cargar el producto para editar")
+                self.producto_editando_id = producto.id
         except Exception as e:
-            messagebox.showerror("Error", f"Error al cargar producto: {str(e)}")
+            messagebox.showerror("Error", f"Error al seleccionar producto: {str(e)}")
 
-    def eliminar_producto(self):
-        """Eliminar producto seleccionado"""
-        seleccion = self.tree.selection()
-        if not seleccion:
-            messagebox.showwarning("Advertencia", "Seleccione un producto para eliminar")
-            return
-
-        item = self.tree.item(seleccion[0])
-        producto_id = item['values'][0]
-        producto_nombre = item['values'][1]
-
-        if messagebox.askyesno("Confirmar", f"¿Eliminar el producto '{producto_nombre}'?"):
-            if self.controller.eliminar_producto(producto_id):
-                self.cargar_productos()
-                self.limpiar_formulario()
-                messagebox.showinfo("Éxito", "Producto eliminado correctamente")
+    def cargar_datos_formulario(self, producto):
+        """Cargar datos del producto en el formulario"""
+        self.nombre_var.set(producto.nombre)
+        self.categoria_var.set(producto.categoria or '')
+        self.precio_compra_var.set(str(producto.precio_compra))
+        self.precio_venta_var.set(str(producto.precio_venta))
+        self.stock_var.set(str(producto.stock))
+        self.stock_minimo_var.set(str(producto.stock_minimo))
+        self.descripcion_var.set(producto.descripcion or '')
+        self.marca_var.set(getattr(producto, 'marca', '') or '')
+        self.tipo_var.set(getattr(producto, 'tipo', '') or '')
+        self.proveedor_var.set(getattr(producto, 'proveedor', '') or '')
 
     def limpiar_formulario(self):
         """Limpiar todos los campos del formulario"""
         self.nombre_var.set('')
         self.categoria_var.set('')
-        self.descripcion_var.set('')
         self.precio_compra_var.set('')
         self.precio_venta_var.set('')
         self.stock_var.set('')
         self.stock_minimo_var.set('')
+        self.descripcion_var.set('')
         self.marca_var.set('')
         self.tipo_var.set('')
         self.proveedor_var.set('')
+        self.modo_edicion = False
+        self.producto_editando_id = None
 
-    def cerrar_ventana(self):
-        """Cerrar la ventana"""
-        self.ventana.destroy()
+    def guardar_producto(self):
+        """Guardar nuevo producto"""
+        if self.modo_edicion:
+            messagebox.showwarning("Advertencia", "Use 'Actualizar Producto' para modificar el producto seleccionado")
+            return
+
+        try:
+            datos = {
+                'nombre': self.nombre_var.get(),
+                'descripcion': self.descripcion_var.get(),
+                'precio_compra': self.precio_compra_var.get() or '0',
+                'precio_venta': self.precio_venta_var.get() or '0',
+                'stock': self.stock_var.get() or '0',
+                'stock_minimo': self.stock_minimo_var.get() or '5',
+                'categoria': self.categoria_var.get(),
+                'marca': self.marca_var.get(),
+                'tipo': self.tipo_var.get(),
+                'proveedor': self.proveedor_var.get()
+            }
+            resultado = self.controller.crear_producto(datos)
+
+            if resultado:
+                messagebox.showinfo("Éxito", "Producto guardado correctamente")
+                self.limpiar_formulario()
+                self.cargar_productos()
+            else:
+                messagebox.showerror("Error", "No se pudo guardar el producto")
+
+        except ValueError as e:
+            messagebox.showerror("Error", "Por favor, verifique que los precios y cantidades sean números válidos")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al guardar: {str(e)}")
+
+    def actualizar_producto(self):
+        """Actualizar producto existente"""
+        if not self.modo_edicion:
+            messagebox.showwarning("Advertencia", "Seleccione un producto de la lista para actualizar")
+            return
+
+        try:
+            datos = {
+                'nombre': self.nombre_var.get(),
+                'descripcion': self.descripcion_var.get(),
+                'precio_compra': self.precio_compra_var.get() or '0',
+                'precio_venta': self.precio_venta_var.get() or '0',
+                'stock': self.stock_var.get() or '0',
+                'stock_minimo': self.stock_minimo_var.get() or '5',
+                'categoria': self.categoria_var.get(),
+                'marca': self.marca_var.get(),
+                'tipo': self.tipo_var.get(),
+                'proveedor': self.proveedor_var.get()
+            }
+            resultado = self.controller.actualizar_producto(self.producto_editando_id, datos)
+
+            if resultado:
+                messagebox.showinfo("Éxito", "Producto actualizado correctamente")
+                self.limpiar_formulario()
+                self.cargar_productos()
+            else:
+                messagebox.showerror("Error", "No se pudo actualizar el producto")
+
+        except ValueError:
+            messagebox.showerror("Error", "Por favor, verifique que los precios y cantidades sean números válidos")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al actualizar: {str(e)}")
+
+    def eliminar_producto(self):
+        """Eliminar producto seleccionado"""
+        if not self.modo_edicion:
+            messagebox.showwarning("Advertencia", "Seleccione un producto de la lista para eliminar")
+            return
+
+        respuesta = messagebox.askyesno("Confirmar",
+                                       f"¿Está seguro de eliminar el producto?\n\nEsta acción no se puede deshacer.")
+        if respuesta:
+            try:
+                resultado = self.controller.eliminar_producto(self.producto_editando_id)
+                if resultado:
+                    messagebox.showinfo("Éxito", "Producto eliminado correctamente")
+                    self.limpiar_formulario()
+                    self.cargar_productos()
+                else:
+                    messagebox.showerror("Error", "No se pudo eliminar el producto")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al eliminar: {str(e)}")
+
+    def generar_skus(self):
+        """Generar SKUs para productos sin SKU"""
+        try:
+            productos_actualizados = self.controller.generar_skus_faltantes()
+            if productos_actualizados > 0:
+                messagebox.showinfo("Éxito", f"Se generaron SKUs para {productos_actualizados} productos")
+                self.cargar_productos()
+            else:
+                messagebox.showinfo("Información", "Todos los productos ya tienen SKU asignado")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al generar SKUs: {str(e)}")

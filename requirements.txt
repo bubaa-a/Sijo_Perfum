@@ -1,0 +1,12 @@
+# Dependencias del Sistema de Inventario Pro
+# La mayoría son bibliotecas estándar de Python
+
+# Solo PyInstaller es necesario para crear el ejecutable
+pyinstaller>=6.0.0
+
+# Las siguientes son bibliotecas estándar incluidas en Python:
+# - tkinter (GUI)
+# - sqlite3 (Base de datos)
+# - datetime (Fechas)
+# - os, sys (Sistema)
+# - tkinter.ttk (Widgets avanzados)

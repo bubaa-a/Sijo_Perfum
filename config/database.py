@@ -138,6 +138,9 @@ class DatabaseManager:
         # Agregar nuevas columnas a la tabla productos si no existen
         self.agregar_columnas_productos(cursor, conn)
 
+        # Agregar columna numero_recibo a ventas si no existe
+        self.agregar_columnas_ventas(cursor, conn)
+
         conn.commit()
         self.cerrar_conexion()
         print(" Base de datos y tablas creadas correctamente")
@@ -152,21 +155,41 @@ class DatabaseManager:
             # Agregar columna marca si no existe
             if 'marca' not in columnas_existentes:
                 cursor.execute("ALTER TABLE productos ADD COLUMN marca TEXT")
-                print(" ✅ Columna 'marca' agregada a productos")
+                print(" Columna 'marca' agregada a productos")
 
             # Agregar columna tipo si no existe
             if 'tipo' not in columnas_existentes:
                 cursor.execute("ALTER TABLE productos ADD COLUMN tipo TEXT")
-                print(" ✅ Columna 'tipo' agregada a productos")
+                print(" Columna 'tipo' agregada a productos")
 
             # Agregar columna proveedor si no existe
             if 'proveedor' not in columnas_existentes:
                 cursor.execute("ALTER TABLE productos ADD COLUMN proveedor TEXT")
-                print(" ✅ Columna 'proveedor' agregada a productos")
+                print(" Columna 'proveedor' agregada a productos")
+
+            # Agregar columna sku si no existe
+            if 'sku' not in columnas_existentes:
+                cursor.execute("ALTER TABLE productos ADD COLUMN sku TEXT")
+                print(" Columna 'sku' agregada a productos")
 
         except Exception as e:
-            print(f" ⚠️ Error al agregar columnas: {e}")
-    
+            print(f" Error al agregar columnas: {e}")
+
+    def agregar_columnas_ventas(self, cursor, conn):
+        """Agregar columna numero_recibo a la tabla ventas"""
+        try:
+            # Verificar si la columna ya existe
+            cursor.execute("PRAGMA table_info(ventas)")
+            columnas_existentes = [col[1] for col in cursor.fetchall()]
+
+            # Agregar columna numero_recibo si no existe
+            if 'numero_recibo' not in columnas_existentes:
+                cursor.execute("ALTER TABLE ventas ADD COLUMN numero_recibo TEXT")
+                print(" Columna 'numero_recibo' agregada a ventas")
+
+        except Exception as e:
+            print(f" Error al agregar columnas a ventas: {e}")
+
     def ejecutar_consulta(self, query, parametros=None):
         """Ejecutar una consulta SQL"""
         conn = self.conectar()
